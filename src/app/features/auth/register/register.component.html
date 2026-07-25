@@ -1,0 +1,62 @@
+<div class="min-h-screen flex items-center justify-center bg-ink px-4">
+  <div class="w-full max-w-sm">
+    <div class="flex items-center justify-center gap-2 mb-8">
+      <span class="text-3xl font-display font-semibold text-chalk">
+        CHARGE<span class="text-plate-red">.</span>
+      </span>
+    </div>
+
+    <form
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="bg-surface border border-border rounded-xl p-6 space-y-4"
+    >
+      <h1 class="text-lg font-display text-chalk mb-2">Créer un compte préparateur</h1>
+
+      <div>
+        <label class="text-xs uppercase tracking-wide text-steel font-display">Nom complet</label>
+        <input
+          type="text"
+          formControlName="fullName"
+          class="w-full mt-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none focus:border-plate-blue"
+          placeholder="Alex Dubois"
+        />
+      </div>
+
+      <div>
+        <label class="text-xs uppercase tracking-wide text-steel font-display">Email</label>
+        <input
+          type="email"
+          formControlName="email"
+          class="w-full mt-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none focus:border-plate-blue"
+          placeholder="toi@club.com"
+        />
+      </div>
+
+      <div>
+        <label class="text-xs uppercase tracking-wide text-steel font-display">Mot de passe</label>
+        <input
+          type="password"
+          formControlName="password"
+          class="w-full mt-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none focus:border-plate-blue"
+          placeholder="8 caractères minimum"
+        />
+      </div>
+
+      <p *ngIf="errorMessage()" class="text-xs text-plate-red">{{ errorMessage() }}</p>
+
+      <button
+        type="submit"
+        [disabled]="form.invalid || loading()"
+        class="w-full py-2.5 rounded-md text-sm font-display tracking-wide bg-plate-red text-chalk disabled:opacity-40"
+      >
+        {{ loading() ? 'CRÉATION…' : 'CRÉER MON COMPTE' }}
+      </button>
+
+      <p class="text-xs text-center text-steel">
+        Déjà un compte ?
+        <a routerLink="/login" class="text-plate-blue">Se connecter</a>
+      </p>
+    </form>
+  </div>
+</div>

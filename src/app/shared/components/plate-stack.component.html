@@ -1,0 +1,13 @@
+<div class="flex items-end gap-[2px] h-9" *ngIf="weight > 0; else empty">
+  <div class="w-1 h-3 rounded-sm mb-0.5 bg-steel"></div>
+  <div
+    *ngFor="let p of plates()"
+    class="rounded-[2px] border border-ink"
+    [ngClass]="p.colorClass"
+    [style.width.px]="5 + p.size * 0.35"
+    [style.height.px]="14 + p.size * 0.7"
+  ></div>
+</div>
+<ng-template #empty>
+  <span class="text-xs text-steel">—</span>
+</ng-template>

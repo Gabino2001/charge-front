@@ -1,0 +1,220 @@
+<div class="min-h-screen bg-ink">
+  <header class="flex items-center justify-between gap-3 px-4 md:px-8 py-4 border-b border-border">
+    <span class="text-xl md:text-2xl font-display font-semibold text-chalk">
+      CHARGE<span class="text-plate-red">.</span>
+    </span>
+    <div class="flex items-center gap-3">
+      <span class="text-xs text-steel hidden sm:inline">{{ authService.fullName() }}</span>
+      <a
+        routerLink="/coach/programs"
+        class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+      >
+        PROGRAMMES
+      </a>
+      <a
+        routerLink="/account/password"
+        class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+      >
+        MOT DE PASSE
+      </a>
+      <button
+        (click)="authService.logout()"
+        class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+      >
+        DÉCONNEXION
+      </button>
+    </div>
+  </header>
+
+  <div class="max-w-3xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-display font-semibold text-chalk">Mon effectif</h1>
+      <div class="flex items-center gap-2">
+        <button
+          (click)="viewMode.set(viewMode() === 'cards' ? 'table' : 'cards')"
+          class="text-[10px] px-2 py-1.5 rounded-full border border-border text-steel font-display tracking-wide"
+        >
+          {{ viewMode() === 'cards' ? 'VUE TABLEAU' : 'VUE CARTES' }}
+        </button>
+        <button
+          (click)="showAddForm.set(!showAddForm())"
+          class="text-xs px-3 py-2 rounded-md bg-plate-red text-chalk font-display tracking-wide"
+        >
+          + AJOUTER UN JOUEUR
+        </button>
+      </div>
+    </div>
+
+    <!-- Bandeau de synthèse -->
+    <div *ngIf="!loading() && players().length > 0" class="grid grid-cols-3 gap-2">
+      <div class="rounded-lg border border-border bg-surface p-3 text-center">
+        <p class="text-lg font-mono text-chalk">{{ players().length }}</p>
+        <p class="text-[10px] text-steel font-display tracking-wide">JOUEURS</p>
+      </div>
+      <div class="rounded-lg border border-border bg-surface p-3 text-center">
+        <p class="text-lg font-mono" [ngClass]="playersWithAlerts() > 0 ? 'text-plate-red' : 'text-chalk'">{{ playersWithAlerts() }}</p>
+        <p class="text-[10px] text-steel font-display tracking-wide">ALERTES ACTIVES</p>
+      </div>
+      <div class="rounded-lg border border-border bg-surface p-3 text-center">
+        <p class="text-lg font-mono" [ngClass]="playersMissingWellness() > 0 ? 'text-plate-yellow' : 'text-chalk'">{{ playersMissingWellness() }}</p>
+        <p class="text-[10px] text-steel font-display tracking-wide">BIEN-ÊTRE MANQUANT</p>
+      </div>
+    </div>
+
+    <!-- Formulaire d'ajout -->
+    <form
+      *ngIf="showAddForm()"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="bg-surface border border-border rounded-xl p-4 space-y-3"
+    >
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input
+          formControlName="fullName"
+          placeholder="Nom complet"
+          class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+        <input
+          formControlName="poste"
+          placeholder="Poste (ex. Milieu offensif)"
+          class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+        <input
+          formControlName="email"
+          placeholder="Email du joueur"
+          class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+        <input
+          formControlName="password"
+          placeholder="Mot de passe temporaire"
+          class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+      </div>
+      <button
+        type="submit"
+        [disabled]="form.invalid || saving()"
+        class="px-3 py-2 rounded-md text-xs bg-plate-blue text-chalk font-display tracking-wide disabled:opacity-40"
+      >
+        {{ saving() ? 'AJOUT…' : 'AJOUTER' }}
+      </button>
+    </form>
+
+    <!-- Vue cartes -->
+    <div *ngIf="viewMode() === 'cards'" class="space-y-2">
+      <div
+        *ngFor="let p of sortedPlayers()"
+        class="flex items-center gap-3 p-3 rounded-lg border border-border bg-surface hover:border-plate-blue transition-colors"
+      >
+        <a [routerLink]="['/coach/players', p.id]" class="flex items-center gap-3 flex-1 min-w-0">
+          <div class="relative w-9 h-9 shrink-0">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center text-xs font-mono bg-ink text-chalk">
+              {{ p.initials }}
+            </div>
+            <span
+              *ngIf="p.hasActiveAlerts"
+              class="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-plate-red border-2 border-surface"
+              title="Alerte active"
+            ></span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-chalk truncate">{{ p.fullName }}</p>
+            <p class="text-xs text-steel truncate">{{ p.poste || 'Poste non renseigné' }}</p>
+          </div>
+          <app-acwr-badge [ratio]="p.acwrRatio" [zone]="p.acwrZone"></app-acwr-badge>
+          <div class="flex flex-col items-end gap-1 shrink-0">
+            <span class="text-xs font-mono" [ngClass]="p.exercisesDone === p.exercisesTotal && p.exercisesTotal > 0 ? 'text-plate-green' : 'text-steel'">
+              {{ p.exercisesDone }}/{{ p.exercisesTotal }}
+            </span>
+            <span
+              class="w-1.5 h-1.5 rounded-full"
+              [ngClass]="p.wellnessSubmittedToday ? 'bg-plate-green' : 'bg-plate-yellow'"
+              [title]="p.wellnessSubmittedToday ? 'Bien-être rempli ce jour' : 'Bien-être pas encore rempli'"
+            ></span>
+            <span
+              class="w-1.5 h-1.5 rounded-full"
+              [ngClass]="p.rpeSubmittedToday ? 'bg-plate-blue' : 'bg-border'"
+              [title]="p.rpeSubmittedToday ? 'RPE rempli ce jour' : 'RPE pas encore rempli'"
+            ></span>
+          </div>
+        </a>
+
+        <!-- Suppression avec confirmation inline -->
+        <button
+          *ngIf="pendingDeleteId() !== p.id"
+          (click)="pendingDeleteId.set(p.id)"
+          class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide shrink-0"
+        >
+          SUPPRIMER
+        </button>
+        <div *ngIf="pendingDeleteId() === p.id" class="flex items-center gap-1 shrink-0">
+          <button
+            (click)="confirmDelete(p.id)"
+            [disabled]="deleting()"
+            class="text-[10px] px-2 py-1 rounded-full bg-plate-red text-chalk font-display tracking-wide"
+          >
+            CONFIRMER
+          </button>
+          <button
+            (click)="pendingDeleteId.set(null)"
+            class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+          >
+            ANNULER
+          </button>
+        </div>
+      </div>
+
+      <p *ngIf="!loading() && players().length === 0" class="text-sm text-steel text-center py-8">
+        Aucun joueur dans l'effectif pour l'instant.
+      </p>
+    </div>
+
+    <!-- Vue tableau de comparaison -->
+    <div *ngIf="viewMode() === 'table'" class="overflow-x-auto rounded-lg border border-border">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-surface-alt text-left">
+            <th (click)="setSortColumn('fullName')" class="px-3 py-2 text-[10px] font-display tracking-wide text-steel cursor-pointer whitespace-nowrap">
+              JOUEUR {{ sortColumn() === 'fullName' ? (sortDirection() === 1 ? '▲' : '▼') : '' }}
+            </th>
+            <th class="px-3 py-2 text-[10px] font-display tracking-wide text-steel whitespace-nowrap">POSTE</th>
+            <th (click)="setSortColumn('acwrRatio')" class="px-3 py-2 text-[10px] font-display tracking-wide text-steel cursor-pointer whitespace-nowrap">
+              ACWR {{ sortColumn() === 'acwrRatio' ? (sortDirection() === 1 ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="setSortColumn('exercisesDone')" class="px-3 py-2 text-[10px] font-display tracking-wide text-steel cursor-pointer whitespace-nowrap">
+              EXERCICES {{ sortColumn() === 'exercisesDone' ? (sortDirection() === 1 ? '▲' : '▼') : '' }}
+            </th>
+            <th (click)="setSortColumn('wellnessSubmittedToday')" class="px-3 py-2 text-[10px] font-display tracking-wide text-steel cursor-pointer whitespace-nowrap">
+              BIEN-ÊTRE {{ sortColumn() === 'wellnessSubmittedToday' ? (sortDirection() === 1 ? '▲' : '▼') : '' }}
+            </th>
+            <th class="px-3 py-2 text-[10px] font-display tracking-wide text-steel whitespace-nowrap">ALERTES</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of tablePlayers(); let i = index"
+            [routerLink]="['/coach/players', p.id]"
+            class="cursor-pointer hover:bg-surface-alt border-t border-border"
+            [ngClass]="i % 2 === 1 ? 'bg-surface' : 'bg-ink'"
+          >
+            <td class="px-3 py-2 text-chalk whitespace-nowrap">{{ p.fullName }}</td>
+            <td class="px-3 py-2 text-steel whitespace-nowrap">{{ p.poste || '—' }}</td>
+            <td class="px-3 py-2 whitespace-nowrap"><app-acwr-badge [ratio]="p.acwrRatio" [zone]="p.acwrZone"></app-acwr-badge></td>
+            <td class="px-3 py-2 font-mono whitespace-nowrap" [ngClass]="p.exercisesDone === p.exercisesTotal && p.exercisesTotal > 0 ? 'text-plate-green' : 'text-steel'">
+              {{ p.exercisesDone }}/{{ p.exercisesTotal }}
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <span class="w-2 h-2 rounded-full inline-block" [ngClass]="p.wellnessSubmittedToday ? 'bg-plate-green' : 'bg-plate-yellow'"></span>
+            </td>
+            <td class="px-3 py-2 whitespace-nowrap">
+              <span *ngIf="p.hasActiveAlerts" class="text-plate-red text-xs">⚠ Active</span>
+              <span *ngIf="!p.hasActiveAlerts" class="text-steel text-xs">—</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!loading() && players().length === 0" class="text-sm text-steel text-center py-8">
+        Aucun joueur dans l'effectif pour l'instant.
+      </p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,15 @@
+<div class="flex items-center gap-1.5 overflow-x-auto pb-1 chips-scroll">
+  <div
+    *ngFor="let entry of rmTable"
+    class="flex flex-col items-center justify-center rounded-md px-2 py-1 shrink-0 border min-w-[40px]"
+    [ngClass]="entry.percentage === 100
+      ? 'bg-plate-red border-plate-red'
+      : 'bg-surface-alt border-border'"
+  >
+    <span
+      class="text-[9px] font-display"
+      [ngClass]="entry.percentage === 100 ? 'text-chalk' : 'text-steel'"
+    >{{ entry.percentage }}%</span>
+    <span class="text-xs font-mono text-chalk">{{ entry.weight }}</span>
+  </div>
+</div>

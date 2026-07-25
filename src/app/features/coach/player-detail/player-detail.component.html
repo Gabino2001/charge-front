@@ -1,0 +1,392 @@
+<div class="min-h-screen bg-ink" *ngIf="player() as p">
+  <header class="flex items-center gap-3 px-4 md:px-8 py-4 border-b border-border">
+    <a routerLink="/coach" class="text-xs text-steel font-display tracking-wide">← EFFECTIF</a>
+    <span class="text-xl font-display font-semibold text-chalk ml-auto">
+      CHARGE<span class="text-plate-red">.</span>
+    </span>
+  </header>
+
+  <div class="max-w-3xl mx-auto px-4 py-6 space-y-6">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <h1 class="text-2xl md:text-3xl font-display font-semibold text-chalk">{{ p.fullName }}</h1>
+          <app-acwr-badge [ratio]="p.acwrRatio" [zone]="p.acwrZone"></app-acwr-badge>
+        </div>
+        <p class="text-sm text-steel">{{ p.poste || 'Poste non renseigné' }}</p>
+      </div>
+      <button
+        (click)="exportPdf()"
+        class="text-[10px] px-3 py-2 rounded-full border border-border text-steel font-display tracking-wide shrink-0"
+      >
+        EXPORTER PDF
+      </button>
+    </div>
+
+    <!-- Alertes -->
+    <div *ngIf="alerts().length > 0" class="space-y-2">
+      <div
+        *ngFor="let a of alerts()"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg bg-plate-red/10 border border-plate-red text-plate-red text-xs"
+      >
+        <span>⚠</span>
+        <span>{{ a.message }}</span>
+      </div>
+    </div>
+
+    <!-- Navigation par onglets -->
+    <div class="flex items-center gap-2 border-b border-border pb-px">
+      <button
+        (click)="activeTab.set('trend')"
+        class="text-xs px-3 py-2 font-display tracking-wide border-b-2 -mb-px"
+        [ngClass]="activeTab() === 'trend' ? 'text-chalk border-plate-red' : 'text-steel border-transparent'"
+      >
+        TENDANCE
+      </button>
+      <button
+        (click)="activeTab.set('fiche')"
+        class="text-xs px-3 py-2 font-display tracking-wide border-b-2 -mb-px"
+        [ngClass]="activeTab() === 'fiche' ? 'text-chalk border-plate-red' : 'text-steel border-transparent'"
+      >
+        FICHE RM
+      </button>
+      <button
+        (click)="activeTab.set('exercises')"
+        class="text-xs px-3 py-2 font-display tracking-wide border-b-2 -mb-px"
+        [ngClass]="activeTab() === 'exercises' ? 'text-chalk border-plate-red' : 'text-steel border-transparent'"
+      >
+        EXERCICES
+      </button>
+    </div>
+
+    <!-- Onglet TENDANCE : bien-être, RPE, blessures, objectifs, courbes -->
+    <ng-container *ngIf="activeTab() === 'trend'">
+    <!-- Bien-être du jour -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border">
+      <p class="text-xs uppercase tracking-wide text-steel font-display mb-3">Bien-être du jour</p>
+      <div *ngIf="todayWellness() as w; else noWellness" class="space-y-2">
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 chips-scroll">
+          <div *ngFor="let stat of wellnessStats(w)" class="flex flex-col items-center justify-center rounded-md px-2 py-1 shrink-0 border border-border bg-surface-alt min-w-[48px]">
+            <span class="text-[8px] uppercase text-steel font-display">{{ stat.label }}</span>
+            <span class="text-sm font-mono" [ngClass]="stat.value <= 2 ? 'text-plate-red' : stat.value === 3 ? 'text-plate-yellow' : 'text-plate-green'">{{ stat.value }}/5</span>
+          </div>
+        </div>
+        <p *ngIf="w.painLocation" class="text-xs px-2 py-1.5 rounded-md bg-plate-red/10 text-plate-red border border-plate-red">
+          ⚠ Douleur signalée : {{ w.painLocation }}
+        </p>
+      </div>
+      <ng-template #noWellness>
+        <p class="text-xs text-steel">Pas encore renseigné aujourd'hui.</p>
+      </ng-template>
+    </section>
+
+    <!-- RPE du jour -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border">
+      <p class="text-xs uppercase tracking-wide text-steel font-display mb-3">Ressenti à l'effort (RPE)</p>
+      <div *ngIf="todayRpe() as r; else noRpe" class="flex items-center gap-4">
+        <span class="text-2xl font-mono" [ngClass]="r.rpe <= 3 ? 'text-plate-green' : r.rpe <= 6 ? 'text-plate-yellow' : 'text-plate-red'">{{ r.rpe }}/10</span>
+        <span class="text-xs text-steel" *ngIf="r.durationMinutes">{{ r.durationMinutes }} min</span>
+        <span class="text-xs text-steel" *ngIf="r.trainingLoad">Charge de séance : {{ r.trainingLoad }}</span>
+      </div>
+      <ng-template #noRpe>
+        <p class="text-xs text-steel">Pas encore de ressenti pour aujourd'hui.</p>
+      </ng-template>
+    </section>
+
+    <!-- Blessures -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Registre de blessures</p>
+        <button (click)="showInjuryForm.set(!showInjuryForm())" class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide">
+          + AJOUTER
+        </button>
+      </div>
+
+      <div class="space-y-2">
+        <div *ngFor="let i of injuries()" class="flex items-center gap-3 py-2 border-b border-border last:border-b-0">
+          <span class="w-2 h-2 rounded-full shrink-0" [ngClass]="i.status === 'EN_COURS' ? 'bg-plate-red' : 'bg-plate-green'"></span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-chalk">{{ i.title }}</p>
+            <p class="text-xs text-steel">{{ i.startDate }}{{ i.endDate ? ' → ' + i.endDate : '' }}</p>
+          </div>
+          <button *ngIf="i.status === 'EN_COURS'" (click)="markInjuryHealed(i)" class="text-[10px] px-2 py-1 rounded-full bg-plate-green text-ink font-display tracking-wide shrink-0">
+            RÉTABLI
+          </button>
+        </div>
+        <p *ngIf="injuries().length === 0" class="text-xs text-steel">Aucune blessure enregistrée.</p>
+      </div>
+
+      <form *ngIf="showInjuryForm()" [formGroup]="injuryForm" (ngSubmit)="submitInjury()" class="mt-4 pt-4 border-t border-border space-y-2">
+        <input formControlName="title" placeholder="Blessure (ex. Entorse cheville)" class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        <input formControlName="description" placeholder="Description (optionnel)" class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        <input formControlName="startDate" type="date" class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        <button type="submit" [disabled]="injuryForm.invalid" class="px-3 py-2 rounded-md text-xs bg-plate-red text-chalk font-display tracking-wide disabled:opacity-40">
+          ENREGISTRER
+        </button>
+      </form>
+    </section>
+
+    <!-- Objectifs -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Objectifs</p>
+        <button (click)="showGoalForm.set(!showGoalForm())" class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide">
+          + FIXER UN OBJECTIF
+        </button>
+      </div>
+
+      <div class="space-y-3">
+        <div *ngFor="let g of goals()" class="space-y-1">
+          <div class="flex items-center justify-between gap-2">
+            <p class="text-sm text-chalk">{{ g.exerciseName }} — cible {{ g.targetOneRepMax }} kg</p>
+            <button (click)="deleteGoal(g.id)" class="text-[10px] text-steel shrink-0">✕</button>
+          </div>
+          <div class="w-full h-2 rounded-full bg-surface-alt overflow-hidden">
+            <div class="h-full bg-plate-blue" [style.width.%]="g.progressPercent ?? 0"></div>
+          </div>
+          <p class="text-xs text-steel">
+            {{ g.currentOneRepMax != null ? (g.currentOneRepMax + ' kg actuel — ' + g.progressPercent + '%') : 'Pas encore de test enregistré' }}
+            <span *ngIf="g.achieved" class="text-plate-green"> · Atteint 🎉</span>
+          </p>
+        </div>
+        <p *ngIf="goals().length === 0" class="text-xs text-steel">Aucun objectif défini.</p>
+      </div>
+
+      <form *ngIf="showGoalForm()" [formGroup]="goalForm" (ngSubmit)="submitGoal()" class="mt-4 pt-4 border-t border-border space-y-2">
+        <input formControlName="exerciseName" placeholder="Exercice (ex. Squat)" class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        <input formControlName="targetOneRepMax" type="number" placeholder="1RM cible (kg)" class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        <input formControlName="targetDate" type="date" class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        <button type="submit" [disabled]="goalForm.invalid" class="px-3 py-2 rounded-md text-xs bg-plate-blue text-chalk font-display tracking-wide disabled:opacity-40">
+          FIXER L'OBJECTIF
+        </button>
+      </form>
+    </section>
+    </ng-container>
+
+    <!-- Onglet EXERCICES -->
+    <ng-container *ngIf="activeTab() === 'exercises'">
+    <!-- Exercices -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border">
+      <p class="text-xs uppercase tracking-wide text-steel font-display mb-3">Exercices assignés</p>
+
+      <div *ngFor="let group of groupedExercises()" class="mb-4 last:mb-0">
+        <p class="text-[10px] uppercase text-steel font-display mb-1.5">{{ group.label }}</p>
+
+        <div *ngFor="let atelier of group.ateliers" class="mb-2 last:mb-0 rounded-lg border border-border overflow-hidden">
+          <button
+            (click)="toggleAtelierOpen(atelier.key)"
+            class="w-full flex items-center justify-between gap-3 p-2.5 bg-surface-alt text-left"
+          >
+            <span class="text-xs text-chalk font-display tracking-wide">{{ atelier.label }}</span>
+            <span class="text-[10px] text-steel font-mono">
+              {{ atelierDoneCount(atelier.items) }}/{{ atelier.items.length }}
+              <span class="ml-1">{{ isAtelierOpen(atelier.key) ? '▾' : '▸' }}</span>
+            </span>
+          </button>
+
+          <div *ngIf="isAtelierOpen(atelier.key)" class="px-2.5 space-y-2">
+          <div *ngFor="let ex of atelier.items; let ei = index">
+            <div *ngIf="editingExerciseId() !== ex.id" class="flex items-center gap-3 py-2 border-b border-border last:border-b-0">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center shrink-0 border"
+                   [ngClass]="ex.done ? 'bg-plate-green border-plate-green' : 'border-steel'">
+                <span *ngIf="ex.done" class="text-ink text-xs">✓</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-chalk">{{ ex.title }}</p>
+                <p class="text-xs text-steel font-mono">
+                  {{ ex.sets ?? '-' }} × {{ ex.reps ?? '-' }}
+                  <span *ngIf="ex.percentRm" class="text-plate-yellow"> · {{ ex.percentRm }}% RM<span *ngIf="suggestedWeight(ex) as w"> ≈ {{ w }} kg</span></span>
+                </p>
+                <div class="flex items-center gap-1.5 mt-0.5" *ngIf="ex.sessionType || ex.recoveryTimeSeconds">
+                  <span *ngIf="ex.sessionType" class="text-[9px] px-1.5 py-0.5 rounded-full font-display tracking-wide"
+                        [ngClass]="ex.sessionType === 'SUPERSET' ? 'bg-plate-yellow/20 text-plate-yellow' : 'bg-plate-blue/20 text-plate-blue'">
+                    {{ ex.sessionType === 'SUPERSET' ? 'SUPER SET' : 'ATELIER' }}<span *ngIf="ex.blockIndex"> {{ ex.blockIndex }}</span>
+                  </span>
+                  <span *ngIf="ex.recoveryTimeSeconds" class="text-[10px] text-steel">récup {{ ex.recoveryTimeSeconds }}s</span>
+                  <span *ngIf="ex.blockRecoveryTimeSeconds" class="text-[10px] text-steel">· récup atelier {{ ex.blockRecoveryTimeSeconds }}s</span>
+                </div>
+                <p *ngIf="ex.exerciseRpe !== null" class="text-[10px] text-plate-blue font-mono mt-0.5">Ressenti : {{ ex.exerciseRpe }}/10</p>
+                <p *ngIf="ex.loadFeedback" class="text-[10px] mt-0.5"
+                   [ngClass]="ex.loadFeedback === 'TOO_HEAVY' ? 'text-plate-red' : ex.loadFeedback === 'TOO_LIGHT' ? 'text-plate-yellow' : 'text-plate-green'">
+                  {{ loadFeedbackLabels[ex.loadFeedback] }}<span *ngIf="ex.loadComment"> — {{ ex.loadComment }}</span>
+                  <button
+                    *ngIf="ex.loadFeedback !== 'PERFECT'"
+                    (click)="suggestFicheUpdate(ex)"
+                    class="ml-1.5 underline decoration-dotted"
+                  >
+                    → mettre à jour le 1RM
+                  </button>
+                </p>
+              </div>
+              <a *ngIf="ex.videoUrl" [href]="ex.videoUrl" target="_blank" class="p-1.5 rounded-md bg-surface-alt text-plate-blue text-xs">▶</a>
+              <span class="text-[10px] px-2 py-1 rounded-full font-display tracking-wide shrink-0"
+                    [ngClass]="ex.done ? 'text-plate-green' : 'bg-surface-alt text-steel'">
+                {{ ex.done ? 'TERMINÉ' : 'EN ATTENTE' }}
+              </span>
+              <button (click)="moveExercise(atelier.items, ei, -1)" [disabled]="ei === 0" class="text-steel text-xs px-1 disabled:opacity-30 shrink-0">▲</button>
+              <button (click)="moveExercise(atelier.items, ei, 1)" [disabled]="ei === atelier.items.length - 1" class="text-steel text-xs px-1 disabled:opacity-30 shrink-0">▼</button>
+              <button (click)="startEditExercise(ex)" class="text-[10px] text-steel shrink-0">MODIFIER</button>
+              <button (click)="deleteExercise(ex.id)" class="text-[10px] text-plate-red shrink-0">SUPPRIMER</button>
+            </div>
+
+            <!-- Édition inline -->
+            <div *ngIf="editingExerciseId() === ex.id" [formGroup]="editExerciseForm" class="py-2 border-b border-border last:border-b-0 space-y-2">
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <input formControlName="title" placeholder="Titre" class="col-span-2 md:col-span-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="sets" type="number" placeholder="Séries" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="reps" placeholder="Reps" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="videoUrl" placeholder="Lien vidéo" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              </div>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <select formControlName="sessionType" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none">
+                  <option value="ATELIER">Atelier</option>
+                  <option value="SUPERSET">Super Set</option>
+                </select>
+                <input formControlName="blockIndex" type="number" min="1" placeholder="N° atelier (ex. 1)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="recoveryTimeSeconds" type="number" placeholder="Récup. exercice (s)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="blockRecoveryTimeSeconds" type="number" placeholder="Récup. atelier (s)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <input formControlName="percentRm" type="number" min="0" max="100" placeholder="% du 1RM (ex. 75)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="scheduledFor" type="date" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              </div>
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="saveEditExercise(ex.id)" [disabled]="editExerciseForm.invalid" class="text-xs px-3 py-1.5 rounded-md bg-plate-blue text-chalk font-display tracking-wide disabled:opacity-40">
+                  ENREGISTRER
+                </button>
+                <button type="button" (click)="cancelEditExercise()" class="text-xs px-3 py-1.5 rounded-md border border-border text-steel font-display tracking-wide">
+                  ANNULER
+                </button>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
+      </div>
+      <p *ngIf="exercises().length === 0" class="text-xs text-steel">Aucun exercice assigné pour l'instant.</p>
+
+      <form [formGroup]="exerciseForm" (ngSubmit)="submitExercise()" class="mt-4 pt-4 border-t border-border space-y-2">
+        <p class="text-xs uppercase tracking-wide text-steel font-display mb-1">Envoyer un exercice</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <input formControlName="title" placeholder="Titre" class="col-span-2 md:col-span-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="sets" type="number" placeholder="Séries" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="reps" placeholder="Reps" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="videoUrl" placeholder="Lien YouTube" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+          <select formControlName="sessionType" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none">
+            <option value="ATELIER">Atelier</option>
+            <option value="SUPERSET">Super Set</option>
+          </select>
+          <input formControlName="blockIndex" type="number" min="1" placeholder="N° atelier (ex. 1)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="recoveryTimeSeconds" type="number" placeholder="Récup. exercice (s)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="blockRecoveryTimeSeconds" type="number" placeholder="Récup. atelier (s)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        </div>
+        <p class="text-[10px] text-steel">Donne le même n° d'atelier à plusieurs exercices pour les regrouper (ex. Atelier 1) côté joueur. Ces réglages restent remplis d'un envoi à l'autre pour enchaîner facilement les exercices du même atelier.</p>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-steel">% du 1RM :</label>
+          <input formControlName="percentRm" type="number" min="0" max="100" placeholder="ex. 75" class="w-24 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <span class="text-[10px] text-steel">(optionnel)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <label class="text-xs text-steel">Date de la séance :</label>
+          <input formControlName="scheduledFor" type="date" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <span class="text-[10px] text-steel">(vide = aujourd'hui)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="submit" [disabled]="exerciseForm.invalid" class="flex items-center gap-1.5 px-3 py-2 rounded-md text-xs bg-plate-red text-chalk font-display tracking-wide disabled:opacity-40">
+            + ENVOYER
+          </button>
+          <button type="button" (click)="resetExerciseForm()" class="text-[10px] text-steel font-display tracking-wide">
+            VIDER LE FORMULAIRE
+          </button>
+        </div>
+      </form>
+    </section>
+    </ng-container>
+
+    <!-- Onglet FICHE RM -->
+    <ng-container *ngIf="activeTab() === 'fiche'">
+    <!-- Fiche de musculation -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border">
+      <p class="text-xs uppercase tracking-wide text-steel font-display mb-1">Fiche de musculation — calcul auto du 1RM et des paliers de % RM</p>
+      <p class="text-[11px] text-steel mb-3">Entre un seul test (poids × reps, donné par toi) : les charges pour 0% à 100% du 1RM se calculent seules. C'est à toi de définir le nombre de répétitions à faire pour chaque palier lors de l'assignation d'un exercice.</p>
+
+      <div class="space-y-4">
+        <div *ngFor="let f of fiche()" class="py-2 border-b border-border last:border-b-0 space-y-2">
+          <div *ngIf="editingFicheId() !== f.id" class="flex flex-wrap items-center gap-3 md:gap-4">
+            <div class="w-32 shrink-0">
+              <p class="text-sm text-chalk">{{ f.exerciseName }}</p>
+              <p class="text-[10px] text-steel font-mono">testé le {{ f.testedAt | date: 'dd/MM/yyyy' }}</p>
+            </div>
+            <app-plate-stack [weight]="f.oneRepMax"></app-plate-stack>
+            <span class="text-sm font-mono text-plate-yellow">1RM {{ f.oneRepMax }} kg</span>
+            <button (click)="startEditFiche(f)" class="text-[10px] text-steel ml-auto shrink-0">MODIFIER</button>
+          </div>
+          <app-rm-chips *ngIf="editingFicheId() !== f.id" [rmTable]="f.rmTable"></app-rm-chips>
+
+          <div *ngIf="editingFicheId() === f.id" [formGroup]="editFicheForm" class="flex flex-wrap items-center gap-2">
+            <p class="text-sm text-chalk w-32 shrink-0">{{ f.exerciseName }}</p>
+            <input formControlName="weight" type="number" class="w-20 px-2 py-1 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+            <span class="text-xs text-steel">kg ×</span>
+            <input formControlName="reps" type="number" class="w-16 px-2 py-1 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+            <button (click)="saveEditFiche(f.id)" [disabled]="editFicheForm.invalid" class="text-xs px-3 py-1.5 rounded-md bg-plate-blue text-chalk font-display tracking-wide disabled:opacity-40">
+              ENREGISTRER
+            </button>
+            <button (click)="cancelEditFiche()" class="text-xs px-3 py-1.5 rounded-md border border-border text-steel font-display tracking-wide">
+              ANNULER
+            </button>
+          </div>
+        </div>
+        <p *ngIf="fiche().length === 0" class="text-xs text-steel">Aucun test enregistré pour l'instant.</p>
+      </div>
+
+      <form [formGroup]="ficheForm" (ngSubmit)="submitFiche()" class="mt-4 pt-4 border-t border-border space-y-2">
+        <p class="text-xs uppercase tracking-wide text-steel font-display mb-1">Ajouter un test</p>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <input formControlName="exerciseName" placeholder="Exercice (ex. Squat)" class="md:col-span-2 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="weight" type="number" placeholder="Poids (kg)" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          <input formControlName="reps" type="number" placeholder="Reps" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+        </div>
+        <button type="submit" [disabled]="ficheForm.invalid" class="px-3 py-2 rounded-md text-xs bg-plate-blue text-chalk font-display tracking-wide disabled:opacity-40">
+          CALCULER ET AJOUTER
+        </button>
+      </form>
+    </section>
+    </ng-container>
+
+    <!-- Tendances (dans l'onglet TENDANCE) -->
+    <ng-container *ngIf="activeTab() === 'trend'">
+    <!-- Tendances -->
+    <section class="rounded-xl p-4 md:p-5 bg-surface border border-border space-y-6">
+      <p class="text-xs uppercase tracking-wide text-steel font-display">Tendances</p>
+
+      <div>
+        <p class="text-xs text-steel mb-1">Bien-être (moyenne /5)</p>
+        <app-trend-chart [points]="wellnessTrend()" color="#4C9A6A" [min]="0" [max]="5" emptyLabel="Pas encore assez de données."></app-trend-chart>
+      </div>
+
+      <div>
+        <p class="text-xs text-steel mb-1">RPE (ressenti /10)</p>
+        <app-trend-chart [points]="rpeTrend()" color="#E8B93B" [min]="0" [max]="10" emptyLabel="Pas encore assez de données."></app-trend-chart>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-xs text-steel">1RM — {{ selectedExercise() }}</p>
+          <select
+            *ngIf="fiche().length > 0"
+            [ngModel]="selectedExercise()"
+            (ngModelChange)="selectExercise($event)"
+            [ngModelOptions]="{ standalone: true }"
+            class="text-xs px-2 py-1 rounded-md bg-surface-alt border border-border text-chalk outline-none"
+          >
+            <option *ngFor="let f of fiche()" [value]="f.exerciseName">{{ f.exerciseName }}</option>
+          </select>
+        </div>
+        <app-trend-chart [points]="oneRmTrend()" color="#E5484D" emptyLabel="Pas encore assez de données pour cet exercice."></app-trend-chart>
+      </div>
+    </section>
+    </ng-container>
+  </div>
+</div>

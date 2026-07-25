@@ -1,0 +1,446 @@
+<div class="min-h-screen bg-ink">
+  <header class="flex items-center justify-between gap-3 px-4 md:px-8 py-4 border-b border-border">
+    <span class="text-xl md:text-2xl font-display font-semibold text-chalk">
+      CHARGE<span class="text-plate-red">.</span>
+    </span>
+    <div class="flex items-center gap-3">
+      <a routerLink="/player/history" class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide">
+        HISTORIQUE
+      </a>
+      <a routerLink="/account/password" class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide">
+        MOT DE PASSE
+      </a>
+      <button (click)="authService.logout()" class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide">
+        DÉCONNEXION
+      </button>
+    </div>
+  </header>
+
+  <!-- Questionnaire bien-être bloquant -->
+  <div *ngIf="checked() && !wellnessDone()" class="max-w-xl mx-auto px-4 py-8 space-y-5">
+    <div>
+      <p class="text-xs uppercase tracking-wide text-steel font-display">Avant de commencer</p>
+      <h2 class="text-xl font-display font-semibold text-chalk">Comment tu te sens aujourd'hui ?</h2>
+      <p class="text-xs mt-1 text-steel">Quelques questions rapides pour ton préparateur, avant d'accéder à tes exercices.</p>
+    </div>
+
+    <div class="rounded-xl p-4 md:p-5 space-y-5 bg-surface border border-border">
+      <app-wellness-scale
+        *ngFor="let q of questions"
+        [question]="q"
+        [value]="draft[q.id]"
+        (valueChange)="setDraft(q.id, $event)"
+      ></app-wellness-scale>
+
+      <div *ngIf="draft['soreness'] && draft['soreness']! <= 2" class="space-y-1.5">
+        <p class="text-sm text-chalk">Où as-tu mal ? (optionnel)</p>
+        <input
+          [(ngModel)]="painLocation"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Ex. mollet droit, genou gauche..."
+          class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+      </div>
+
+      <button
+        (click)="submitWellness()"
+        [disabled]="!allAnswered() || submitting()"
+        class="w-full py-2.5 rounded-md text-sm font-display tracking-wide bg-plate-red text-chalk disabled:opacity-40"
+      >
+        {{ submitting() ? 'ENVOI…' : 'VALIDER ET VOIR MES EXERCICES' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Exercices + fiche -->
+  <div *ngIf="wellnessDone()" class="max-w-xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 shrink-0 rounded-full bg-surface border border-border flex items-center justify-center">
+        <span class="text-lg font-display font-semibold text-chalk">{{ authService.fullName()?.charAt(0) }}</span>
+      </div>
+      <div class="flex-1">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Aujourd'hui</p>
+        <h2 class="text-xl font-display font-semibold text-chalk">{{ authService.fullName() }}</h2>
+      </div>
+    </div>
+
+    <!-- Ressenti par exercice : popup après avoir coché un exercice -->
+    <div *ngIf="pendingRpeExercise() as pex" class="rounded-xl p-4 md:p-5 bg-surface border border-plate-blue space-y-3">
+      <div>
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Ressenti de l'exercice</p>
+        <h3 class="text-sm text-chalk">Comment était « {{ pex.title }} » ?</h3>
+      </div>
+      <app-rpe-scale [value]="pendingRpeDraft" (valueChange)="pendingRpeDraft = $event"></app-rpe-scale>
+
+      <!-- Ressenti sur la charge donnée (utile si un %RM était indiqué) -->
+      <div class="space-y-1.5">
+        <p class="text-xs text-steel">La charge par rapport à ce qui était demandé ? (optionnel)</p>
+        <div class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            (click)="setLoadFeedback('TOO_HEAVY')"
+            class="text-[11px] px-2.5 py-1.5 rounded-full border font-display tracking-wide"
+            [ngClass]="pendingLoadFeedback === 'TOO_HEAVY' ? 'bg-plate-red text-chalk border-plate-red' : 'border-border text-steel'"
+          >
+            Trop lourd
+          </button>
+          <button
+            type="button"
+            (click)="setLoadFeedback('PERFECT')"
+            class="text-[11px] px-2.5 py-1.5 rounded-full border font-display tracking-wide"
+            [ngClass]="pendingLoadFeedback === 'PERFECT' ? 'bg-plate-green text-ink border-plate-green' : 'border-border text-steel'"
+          >
+            Parfait
+          </button>
+          <button
+            type="button"
+            (click)="setLoadFeedback('TOO_LIGHT')"
+            class="text-[11px] px-2.5 py-1.5 rounded-full border font-display tracking-wide"
+            [ngClass]="pendingLoadFeedback === 'TOO_LIGHT' ? 'bg-plate-yellow text-ink border-plate-yellow' : 'border-border text-steel'"
+          >
+            Trop léger
+          </button>
+        </div>
+        <input
+          [(ngModel)]="pendingLoadComment"
+          [ngModelOptions]="{ standalone: true }"
+          maxlength="300"
+          placeholder="Ex. je pouvais encore faire 2 à 3 répétitions de plus"
+          class="w-full px-3 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none"
+        />
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          (click)="submitPendingRpe()"
+          [disabled]="pendingRpeDraft === null || pendingRpeSubmitting()"
+          class="flex-1 py-2 rounded-md text-sm font-display tracking-wide bg-plate-blue text-chalk disabled:opacity-40"
+        >
+          {{ pendingRpeSubmitting() ? 'ENVOI…' : 'ENVOYER' }}
+        </button>
+        <button (click)="skipPendingRpe()" class="px-3 py-2 rounded-md text-sm border border-border text-steel font-display tracking-wide">
+          PLUS TARD
+        </button>
+      </div>
+    </div>
+
+    <!-- Choix de la séance, uniquement si plusieurs séances aujourd'hui -->
+    <div *ngIf="needsSessionPicker()" class="space-y-2">
+      <p class="text-xs uppercase tracking-wide text-steel font-display">Mes séances du jour</p>
+      <button
+        *ngFor="let group of sessionGroups()"
+        (click)="openSession(group.session.id)"
+        class="w-full flex items-center justify-between gap-3 p-4 rounded-xl text-left border bg-surface border-border"
+      >
+        <div>
+          <p class="text-sm text-chalk font-display tracking-wide">Séance {{ group.session.sessionNumber }}</p>
+          <p class="text-xs text-steel font-mono mt-0.5">{{ sessionDoneCount(group) }}/{{ group.items.length }} exercices</p>
+        </div>
+        <span class="text-[10px] px-2 py-1 rounded-full font-display tracking-wide"
+              [ngClass]="group.session.status === 'COMPLETED' ? 'bg-plate-green/20 text-plate-green' : 'bg-surface-alt text-steel'">
+          {{ group.session.status === 'COMPLETED' ? 'TERMINÉE' : 'EN COURS' }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Ateliers de la séance active -->
+    <div *ngIf="showAteliers()" class="space-y-3">
+      <button *ngIf="sessionGroups().length > 1" (click)="closeSession()" class="text-xs text-steel font-display tracking-wide">
+        ‹ MES SÉANCES
+      </button>
+      <p class="text-xs uppercase tracking-wide text-steel font-display">
+        {{ sessionGroups().length > 1 ? ('Séance ' + activeSessionGroup()?.session?.sessionNumber) : 'Ma séance du jour' }}
+      </p>
+
+      <!-- Vue liste des ateliers -->
+      <div *ngIf="selectedAtelier() === null" class="space-y-2">
+        <p *ngIf="atelierSequence() === null && ateliers().length > 1" class="text-[11px] text-steel">
+          Choisis l'atelier par lequel tu veux commencer — les autres suivront dans l'ordre à partir de ton choix.
+        </p>
+        <button
+          *ngFor="let group of orderedAteliers()"
+          (click)="openAtelier(group.key)"
+          [disabled]="!isAtelierUnlocked(group)"
+          class="w-full flex items-center justify-between gap-3 p-4 rounded-xl text-left border bg-surface disabled:opacity-50 disabled:cursor-not-allowed"
+          [ngClass]="isAtelierUnlocked(group) ? 'border-border' : 'border-border'"
+        >
+          <div>
+            <p class="text-sm text-chalk font-display tracking-wide">{{ group.label }}</p>
+            <p class="text-xs text-steel font-mono mt-0.5">{{ atelierDoneCount(group) }}/{{ group.items.length }} exercices</p>
+            <ng-container *ngIf="!isAtelierUnlocked(group) && previousAtelier(group) as prev">
+              <p *ngIf="isRestTimerFor('atelier-' + prev.key)" class="text-[10px] text-plate-yellow font-mono mt-0.5">
+                🔒 récup en cours — {{ restTimer()?.remaining }}s
+              </p>
+              <p *ngIf="!isRestTimerFor('atelier-' + prev.key)" class="text-[10px] text-steel font-mono mt-0.5">
+                🔒 termine l'atelier précédent
+              </p>
+            </ng-container>
+          </div>
+          <div class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 border"
+               [ngClass]="atelierDoneCount(group) === group.items.length ? 'bg-plate-green border-plate-green' : 'border-steel'">
+            <span *ngIf="atelierDoneCount(group) === group.items.length" class="text-ink text-sm">✓</span>
+            <span *ngIf="atelierDoneCount(group) !== group.items.length && isAtelierUnlocked(group)" class="text-steel text-xs">›</span>
+            <span *ngIf="atelierDoneCount(group) !== group.items.length && !isAtelierUnlocked(group)" class="text-steel text-xs">🔒</span>
+          </div>
+        </button>
+        <p *ngIf="ateliers().length === 0" class="text-xs text-steel">Aucun exercice pour cette séance.</p>
+
+        <button
+          *ngIf="ateliers().length > 0"
+          (click)="finishSession()"
+          [disabled]="!allActiveSessionDone()"
+          class="w-full py-2.5 rounded-md text-sm font-display tracking-wide bg-plate-green text-ink disabled:opacity-40 disabled:bg-surface-alt disabled:text-steel mt-2"
+        >
+          VALIDER LA FIN DE SÉANCE
+        </button>
+      </div>
+
+      <!-- Vue détail d'un atelier -->
+      <div *ngIf="selectedAtelier() as group" class="space-y-2">
+        <button (click)="closeAtelier()" class="text-xs text-steel font-display tracking-wide mb-1">‹ RETOUR AUX ATELIERS</button>
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-chalk font-display tracking-wide">{{ group.label }}</p>
+          <span class="text-[9px] px-1.5 py-0.5 rounded-full font-display tracking-wide"
+                [ngClass]="isCircuitAtelier(group) ? 'bg-plate-blue/20 text-plate-blue' : 'bg-plate-yellow/20 text-plate-yellow'">
+            {{ isCircuitAtelier(group) ? 'CIRCUIT TRAINING' : 'SUPER SET' }}
+          </span>
+        </div>
+        <p class="text-[10px] text-steel">
+          {{ isCircuitAtelier(group)
+            ? 'Récupère automatiquement après chaque exercice avant de débloquer le suivant.'
+            : 'Enchaîne les exercices sans temps de repos entre eux — la récup est à la fin de l\'atelier.' }}
+        </p>
+
+        <div *ngFor="let ex of group.items">
+          <div
+            (click)="isExerciseUnlocked(group, ex) && toggle(ex)"
+            class="w-full flex items-center gap-3 p-3 rounded-xl text-left border bg-surface"
+            [ngClass]="[
+              ex.done ? 'border-plate-green' : 'border-border',
+              isExerciseUnlocked(group, ex) ? 'cursor-pointer' : 'opacity-50 cursor-not-allowed'
+            ]"
+          >
+            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 border"
+                 [ngClass]="ex.done ? 'bg-plate-green border-plate-green' : 'border-steel'">
+              <span *ngIf="ex.done" class="text-ink text-sm">✓</span>
+              <span *ngIf="!ex.done && !isExerciseUnlocked(group, ex)" class="text-steel text-xs">🔒</span>
+            </div>
+            <div class="flex-1">
+              <p class="text-sm text-chalk">{{ ex.title }}</p>
+              <p class="text-xs text-steel font-mono">
+                {{ ex.sets ?? '-' }} × {{ ex.reps ?? '-' }}
+                <span *ngIf="ex.percentRm" class="text-plate-yellow"> · {{ ex.percentRm }}% RM<span *ngIf="suggestedWeight(ex) as w"> ≈ {{ w }} kg</span></span>
+              </p>
+              <p *ngIf="ex.exerciseRpe !== null" class="text-[10px] text-plate-blue font-mono mt-0.5">Ressenti : {{ ex.exerciseRpe }}/10</p>
+              <p *ngIf="ex.loadFeedback" class="text-[10px] mt-0.5"
+                 [ngClass]="ex.loadFeedback === 'TOO_HEAVY' ? 'text-plate-red' : ex.loadFeedback === 'TOO_LIGHT' ? 'text-plate-yellow' : 'text-plate-green'">
+                {{ loadFeedbackLabels[ex.loadFeedback] }}<span *ngIf="ex.loadComment"> — {{ ex.loadComment }}</span>
+              </p>
+
+              <!-- Verrouillé : en attente que la récup de l'exercice précédent s'écoule -->
+              <p *ngIf="!isExerciseUnlocked(group, ex)" class="text-[10px] text-steel font-mono mt-1">
+                🔒 débloqué après la récup de l'exercice précédent
+              </p>
+
+              <!-- Minuteur de récupération après CET exercice : démarré automatiquement, uniquement en circuit training -->
+              <div *ngIf="isCircuitAtelier(group) && ex.done && ex.recoveryTimeSeconds && !isExerciseRecoveryCleared(ex)" (click)="$event.stopPropagation()">
+                <div *ngIf="isRestTimerFor('ex-' + ex.id)" class="flex items-center gap-2 mt-1.5">
+                  <span class="text-sm font-mono text-plate-blue">{{ restTimer()?.remaining }}s</span>
+                  <div class="flex-1 h-1.5 rounded-full bg-surface-alt overflow-hidden max-w-[80px]">
+                    <div class="h-full bg-plate-blue" [style.width.%]="((restTimer()?.remaining ?? 0) / (restTimer()?.total ?? 1)) * 100"></div>
+                  </div>
+                </div>
+                <button
+                  *ngIf="!isRestTimerFor('ex-' + ex.id)"
+                  (click)="startExerciseRestTimer(ex)"
+                  class="mt-1.5 text-[10px] px-2 py-1 rounded-full border border-border text-plate-blue font-display tracking-wide"
+                >
+                  ⏱ DÉMARRER LA RÉCUP ({{ ex.recoveryTimeSeconds }}s)
+                </button>
+              </div>
+            </div>
+
+            <!-- Vidéo YouTube : bouton pour déplier le lecteur intégré -->
+            <button
+              *ngIf="ex.videoUrl && videoEmbedUrl(ex)"
+              (click)="toggleVideo(ex.id); $event.stopPropagation()"
+              class="p-2 rounded-md bg-surface-alt text-plate-blue text-xs shrink-0"
+            >
+              {{ expandedVideoExerciseId() === ex.id ? '✕' : '▶' }}
+            </button>
+            <a *ngIf="ex.videoUrl && !videoEmbedUrl(ex)" [href]="ex.videoUrl" target="_blank" (click)="$event.stopPropagation()" class="p-2 rounded-md bg-surface-alt text-plate-blue text-xs shrink-0">▶</a>
+          </div>
+
+          <div *ngIf="expandedVideoExerciseId() === ex.id && videoEmbedUrl(ex) as embedUrl" class="mt-2 rounded-xl overflow-hidden border border-border aspect-video">
+            <iframe
+              [src]="embedUrl | safeEmbed"
+              class="w-full h-full"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+
+        <!-- Atelier terminé : passage automatique, verrouillé par la récup si l'atelier en a une -->
+        <div
+          *ngIf="atelierDoneCount(group) === group.items.length"
+          class="rounded-xl p-3 bg-surface border border-plate-yellow/40 space-y-2"
+        >
+          <!-- Récup en cours (démarrée automatiquement) : pas de bouton pour la passer -->
+          <div *ngIf="atelierRecoveryTimeSeconds(group) && !isAtelierRecoveryCleared(group)" class="flex items-center justify-between gap-3">
+            <div>
+              <p class="text-xs text-chalk font-display tracking-wide">Atelier terminé</p>
+              <p class="text-[10px] text-steel">Récupération avant l'atelier suivant, verrouillé jusqu'à la fin du temps.</p>
+            </div>
+            <div *ngIf="isRestTimerFor('atelier-' + group.key); else atelierRestStart" class="flex items-center gap-2 shrink-0">
+              <div class="w-10 h-10 rounded-full border-2 border-plate-yellow flex items-center justify-center">
+                <span class="text-xs font-mono text-plate-yellow">{{ restTimer()?.remaining }}</span>
+              </div>
+            </div>
+            <ng-template #atelierRestStart>
+              <button
+                (click)="startAtelierRestTimer(group)"
+                class="text-[10px] px-2 py-1 rounded-full border border-plate-yellow text-plate-yellow font-display tracking-wide shrink-0"
+              >
+                ⏱ DÉMARRER LA RÉCUP ({{ atelierRecoveryTimeSeconds(group) }}s)
+              </button>
+            </ng-template>
+          </div>
+
+          <!-- Récup terminée (ou pas de récup requise) : passage à l'atelier suivant -->
+          <div *ngIf="!atelierRecoveryTimeSeconds(group) || isAtelierRecoveryCleared(group)" class="flex items-center justify-between gap-3">
+            <p class="text-xs text-plate-green font-display tracking-wide">✓ Atelier terminé — prêt pour la suite</p>
+            <button
+              *ngIf="nextAtelier(group) as next"
+              (click)="goToNextAtelier(group)"
+              class="text-xs px-3 py-1.5 rounded-full bg-plate-green text-ink font-display tracking-wide shrink-0"
+            >
+              ATELIER SUIVANT →
+            </button>
+            <button
+              *ngIf="!nextAtelier(group)"
+              (click)="closeAtelier()"
+              class="text-xs px-3 py-1.5 rounded-full border border-plate-green text-plate-green font-display tracking-wide shrink-0"
+            >
+              RETOUR AUX ATELIERS
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RPE global de la séance active : affiché une fois toute la séance validée -->
+    <div *ngIf="activeSessionGroup() as g">
+      <div *ngIf="!showAteliers() && g.session.status !== 'COMPLETED'" class="rounded-xl p-4 md:p-5 bg-surface border border-border space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-xs uppercase tracking-wide text-steel font-display">Après la séance</p>
+            <h3 class="text-sm text-chalk">Comment était l'effort aujourd'hui ?</h3>
+          </div>
+          <button (click)="cancelFinishSession()" class="text-[10px] text-steel font-display tracking-wide shrink-0">
+            ‹ REVOIR MES EXERCICES
+          </button>
+        </div>
+        <app-rpe-scale [value]="rpeDraft" (valueChange)="rpeDraft = $event"></app-rpe-scale>
+        <div>
+          <label class="text-xs text-steel">Durée de la séance en minutes (optionnel)</label>
+          <input
+            type="number"
+            [(ngModel)]="rpeDuration"
+            [ngModelOptions]="{ standalone: true }"
+            placeholder="ex. 60"
+            class="w-full mt-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+          />
+        </div>
+        <button
+          (click)="submitRpe()"
+          [disabled]="rpeDraft === null || rpeSubmitting()"
+          class="w-full py-2.5 rounded-md text-sm font-display tracking-wide bg-plate-blue text-chalk disabled:opacity-40"
+        >
+          {{ rpeSubmitting() ? 'ENVOI…' : 'ENVOYER MON RESSENTI' }}
+        </button>
+      </div>
+
+      <div *ngIf="g.session.status === 'COMPLETED' && !rpeEditing()" class="rounded-xl p-4 bg-surface border border-border">
+        <div class="flex items-center justify-between mb-2">
+          <p class="text-xs uppercase tracking-wide text-steel font-display">Ressenti de la séance</p>
+          <button (click)="startEditRpe()" class="text-[10px] text-steel">MODIFIER</button>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-2xl font-mono text-chalk">{{ g.session.rpe }}/10</span>
+          <span class="text-xs text-steel" *ngIf="g.session.trainingLoad">Charge de séance : {{ g.session.trainingLoad }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="g.session.status === 'COMPLETED' && rpeEditing()" class="rounded-xl p-4 md:p-5 bg-surface border border-border space-y-3">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Corriger mon ressenti</p>
+        <app-rpe-scale [value]="rpeDraft" (valueChange)="rpeDraft = $event"></app-rpe-scale>
+        <input
+          type="number"
+          [(ngModel)]="rpeDuration"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Durée en minutes (optionnel)"
+          class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+        <div class="flex items-center gap-2">
+          <button
+            (click)="saveEditRpe()"
+            [disabled]="rpeDraft === null || rpeSubmitting()"
+            class="flex-1 py-2 rounded-md text-sm font-display tracking-wide bg-plate-blue text-chalk disabled:opacity-40"
+          >
+            {{ rpeSubmitting() ? 'ENVOI…' : 'ENREGISTRER LA CORRECTION' }}
+          </button>
+          <button (click)="cancelEditRpe()" class="px-3 py-2 rounded-md text-sm border border-border text-steel font-display tracking-wide">
+            ANNULER
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p *ngIf="sessionGroups().length === 0" class="text-xs text-steel">Aucun exercice pour aujourd'hui.</p>
+
+    <div class="rounded-xl p-4 bg-surface border border-border">
+      <div class="flex items-center justify-between mb-3">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Mes charges — 0% à 100% du 1RM</p>
+        <button
+          *ngIf="fiche().length > 0"
+          (click)="downloadFichePdf()"
+          class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide shrink-0"
+        >
+          TÉLÉCHARGER EN PDF
+        </button>
+      </div>
+      <div class="space-y-3">
+        <div *ngFor="let f of fiche()" class="space-y-2">
+          <div class="flex items-center justify-between gap-3">
+            <div class="w-32 shrink-0">
+              <p class="text-sm text-chalk">{{ f.exerciseName }}</p>
+              <p class="text-[10px] text-steel font-mono">testé le {{ f.testedAt | date: 'dd/MM/yyyy' }}</p>
+            </div>
+            <app-plate-stack [weight]="f.oneRepMax"></app-plate-stack>
+            <span class="text-sm font-mono text-plate-yellow">{{ f.oneRepMax }} kg</span>
+          </div>
+          <app-rm-chips [rmTable]="f.rmTable"></app-rm-chips>
+        </div>
+        <p *ngIf="fiche().length === 0" class="text-xs text-steel">Pas encore de charges enregistrées.</p>
+      </div>
+    </div>
+
+    <div *ngIf="goals().length > 0" class="rounded-xl p-4 bg-surface border border-border">
+      <p class="text-xs uppercase tracking-wide text-steel font-display mb-3">Mes objectifs</p>
+      <div class="space-y-3">
+        <div *ngFor="let g of goals()" class="space-y-1">
+          <p class="text-sm text-chalk">{{ g.exerciseName }} — cible {{ g.targetOneRepMax }} kg</p>
+          <div class="w-full h-2 rounded-full bg-surface-alt overflow-hidden">
+            <div class="h-full bg-plate-blue" [style.width.%]="g.progressPercent ?? 0"></div>
+          </div>
+          <p class="text-xs text-steel">
+            {{ g.currentOneRepMax != null ? (g.currentOneRepMax + ' kg actuel — ' + g.progressPercent + '%') : 'Pas encore de test enregistré' }}
+            <span *ngIf="g.achieved" class="text-plate-green"> · Atteint 🎉</span>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

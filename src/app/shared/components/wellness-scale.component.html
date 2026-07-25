@@ -1,0 +1,20 @@
+<div class="space-y-1.5">
+  <p class="text-sm text-chalk">{{ question.label }}</p>
+  <div class="flex items-center gap-2">
+    <button
+      type="button"
+      *ngFor="let n of [1, 2, 3, 4, 5]"
+      (click)="valueChange.emit(n)"
+      class="flex-1 h-10 rounded-md text-sm font-mono border transition-colors"
+      [ngClass]="value === n
+        ? 'bg-plate-blue border-plate-blue text-chalk'
+        : 'bg-surface-alt border-border text-steel'"
+    >
+      {{ n }}
+    </button>
+  </div>
+  <div class="flex items-center justify-between text-[10px] text-steel">
+    <span>{{ question.low }}</span>
+    <span>{{ question.high }}</span>
+  </div>
+</div>

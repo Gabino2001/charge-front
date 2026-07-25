@@ -1,0 +1,56 @@
+<div class="min-h-screen bg-ink">
+  <header class="flex items-center gap-3 px-4 md:px-8 py-4 border-b border-border">
+    <a routerLink="/player" class="text-xs text-steel font-display tracking-wide">← MA SÉANCE</a>
+    <span class="text-xl font-display font-semibold text-chalk ml-auto">
+      CHARGE<span class="text-plate-red">.</span>
+    </span>
+  </header>
+
+  <div class="max-w-xl mx-auto px-4 py-8 space-y-4">
+    <h1 class="text-xl font-display font-semibold text-chalk">Mes séances passées</h1>
+
+    <div *ngIf="loading()" class="text-xs text-steel">Chargement…</div>
+
+    <div *ngIf="!loading() && pastSessions().length === 0" class="text-sm text-steel">
+      Aucune séance passée pour l'instant.
+    </div>
+
+    <div *ngFor="let group of pastSessions()" class="rounded-xl border border-border bg-surface overflow-hidden">
+      <button
+        (click)="toggleExpand(group.session.id)"
+        class="w-full flex items-center justify-between gap-3 p-4 text-left"
+      >
+        <div>
+          <p class="text-sm text-chalk font-display tracking-wide">
+            {{ group.session.sessionDate | date: 'EEEE d MMMM' }}
+            <span *ngIf="group.session.sessionNumber > 1"> — Séance {{ group.session.sessionNumber }}</span>
+          </p>
+          <p class="text-xs text-steel font-mono mt-0.5">{{ doneCount(group) }}/{{ group.items.length }} exercices</p>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <span *ngIf="group.session.rpe !== null" class="text-xs font-mono text-plate-blue">RPE {{ group.session.rpe }}/10</span>
+          <span
+            class="text-[10px] px-2 py-1 rounded-full font-display tracking-wide"
+            [ngClass]="group.session.status === 'COMPLETED' ? 'bg-plate-green/20 text-plate-green' : 'bg-surface-alt text-steel'"
+          >
+            {{ group.session.status === 'COMPLETED' ? 'TERMINÉE' : 'INCOMPLÈTE' }}
+          </span>
+          <span class="text-steel text-xs">{{ expandedSessionId() === group.session.id ? '▾' : '▸' }}</span>
+        </div>
+      </button>
+
+      <div *ngIf="expandedSessionId() === group.session.id" class="px-4 pb-4 space-y-2 border-t border-border pt-3">
+        <div *ngFor="let ex of group.items" class="flex items-center gap-3">
+          <div class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 border"
+               [ngClass]="ex.done ? 'bg-plate-green border-plate-green' : 'border-steel'">
+            <span *ngIf="ex.done" class="text-ink text-[10px]">✓</span>
+          </div>
+          <p class="text-sm text-chalk">{{ ex.title }}</p>
+          <p class="text-xs text-steel font-mono ml-auto">{{ ex.sets ?? '-' }} × {{ ex.reps ?? '-' }}</p>
+        </div>
+        <p *ngIf="group.session.trainingLoad" class="text-[10px] text-steel pt-1">Charge de séance : {{ group.session.trainingLoad }}</p>
+        <p *ngIf="group.session.comment" class="text-[10px] text-steel">{{ group.session.comment }}</p>
+      </div>
+    </div>
+  </div>
+</div>

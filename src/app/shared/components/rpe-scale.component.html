@@ -1,0 +1,20 @@
+<div class="space-y-2">
+  <div class="grid grid-cols-6 sm:grid-cols-11 gap-1.5">
+    <button
+      type="button"
+      *ngFor="let n of levels"
+      (click)="valueChange.emit(n)"
+      class="h-10 rounded-md text-sm font-mono border transition-colors"
+      [ngClass]="value === n
+        ? (n <= 3 ? 'bg-plate-green border-plate-green text-ink' : n <= 6 ? 'bg-plate-yellow border-plate-yellow text-ink' : 'bg-plate-red border-plate-red text-chalk')
+        : 'bg-surface-alt border-border text-steel'"
+    >
+      {{ n }}
+    </button>
+  </div>
+  <p class="text-xs text-steel text-center" *ngIf="value !== null">{{ labelFor(value) }}</p>
+  <div class="flex items-center justify-between text-[10px] text-steel">
+    <span>0 · Repos</span>
+    <span>10 · Maximal</span>
+  </div>
+</div>

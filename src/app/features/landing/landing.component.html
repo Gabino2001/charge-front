@@ -1,0 +1,248 @@
+<div class="min-h-screen bg-ink text-chalk overflow-x-hidden">
+
+  <!-- Nav -->
+  <nav class="sticky top-0 z-30 backdrop-blur bg-ink/85 border-b border-border">
+    <div class="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+      <span class="text-xl font-display font-semibold tracking-wide">
+        CHARGE<span class="text-plate-red">.</span>
+      </span>
+      <div class="hidden md:flex items-center gap-8 text-xs font-display tracking-wide text-steel">
+        <a href="#ateliers" class="hover:text-chalk transition-colors">FONCTIONNALITÉS</a>
+        <a href="#roles" class="hover:text-chalk transition-colors">COACH &amp; JOUEUR</a>
+      </div>
+      <div class="flex items-center gap-2">
+        <a routerLink="/login" class="text-xs px-3 py-2 rounded-full border border-border text-steel font-display tracking-wide hover:text-chalk hover:border-steel transition-colors">
+          SE CONNECTER
+        </a>
+        <a routerLink="/register" class="text-xs px-3 py-2 rounded-full bg-plate-red text-chalk font-display tracking-wide hover:brightness-110 transition">
+          CRÉER UN COMPTE
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <header class="max-w-6xl mx-auto px-4 md:px-8 pt-14 md:pt-20 pb-16 md:pb-24">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <p class="text-[11px] font-display tracking-[0.2em] text-plate-yellow mb-4">
+          POUR PRÉPARATEURS PHYSIQUES &amp; ATHLÈTES
+        </p>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl font-display font-semibold leading-[1.05] tracking-tight">
+          CHAQUE CHARGE
+          <br />
+          <span class="text-plate-red">COMPTE.</span>
+        </h1>
+        <p class="mt-6 text-base md:text-lg text-steel max-w-md leading-relaxed">
+          CHARGE. remplace le carnet, le tableur et les messages WhatsApp par un seul endroit pour programmer
+          les séances, calculer le 1RM et lire le ressenti de chaque joueur — atelier par atelier.
+        </p>
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <a routerLink="/register" class="px-5 py-3 rounded-full bg-plate-red text-chalk text-sm font-display tracking-wide hover:brightness-110 transition">
+            CRÉER MON COMPTE COACH
+          </a>
+          <a routerLink="/login" class="px-5 py-3 rounded-full border border-border text-chalk text-sm font-display tracking-wide hover:border-steel transition">
+            J'AI DÉJÀ UN COMPTE
+          </a>
+        </div>
+      </div>
+
+      <!-- Signature : la barre qui se charge -->
+      <div class="rounded-2xl border border-border bg-surface p-6 md:p-10">
+        <div class="flex items-center justify-center gap-1 md:gap-1.5">
+          <div class="plate-anim w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-plate-green bg-plate-green/15 flex items-center justify-center" style="animation-delay:0ms">
+            <span class="text-[9px] md:text-[10px] font-mono text-plate-green">10</span>
+          </div>
+          <div class="plate-anim w-11 h-11 md:w-14 md:h-14 rounded-full border-4 border-plate-yellow bg-plate-yellow/15 flex items-center justify-center" style="animation-delay:90ms">
+            <span class="text-[9px] md:text-[10px] font-mono text-plate-yellow">15</span>
+          </div>
+          <div class="plate-anim w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-plate-blue bg-plate-blue/15 flex items-center justify-center" style="animation-delay:180ms">
+            <span class="text-[9px] md:text-[10px] font-mono text-plate-blue">20</span>
+          </div>
+          <div class="plate-anim w-14 h-14 md:w-20 md:h-20 rounded-full border-4 border-plate-red bg-plate-red/15 flex items-center justify-center" style="animation-delay:270ms">
+            <span class="text-[10px] md:text-xs font-mono text-plate-red">25</span>
+          </div>
+
+          <div class="h-1.5 md:h-2 w-10 md:w-16 bg-steel/30 rounded-full shrink-0"></div>
+
+          <div class="plate-anim w-14 h-14 md:w-20 md:h-20 rounded-full border-4 border-plate-red bg-plate-red/15 flex items-center justify-center" style="animation-delay:270ms">
+            <span class="text-[10px] md:text-xs font-mono text-plate-red">25</span>
+          </div>
+          <div class="plate-anim w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-plate-blue bg-plate-blue/15 flex items-center justify-center" style="animation-delay:180ms">
+            <span class="text-[9px] md:text-[10px] font-mono text-plate-blue">20</span>
+          </div>
+          <div class="plate-anim w-11 h-11 md:w-14 md:h-14 rounded-full border-4 border-plate-yellow bg-plate-yellow/15 flex items-center justify-center" style="animation-delay:90ms">
+            <span class="text-[9px] md:text-[10px] font-mono text-plate-yellow">15</span>
+          </div>
+          <div class="plate-anim w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-plate-green bg-plate-green/15 flex items-center justify-center" style="animation-delay:0ms">
+            <span class="text-[9px] md:text-[10px] font-mono text-plate-green">10</span>
+          </div>
+        </div>
+
+        <div class="mt-8 text-center">
+          <p class="text-4xl md:text-5xl font-mono font-bold text-chalk tabular-nums">{{ displayedLoad }}<span class="text-lg text-steel"> kg</span></p>
+          <p class="mt-2 text-[11px] text-steel font-display tracking-wide">1RM CALCULÉ AUTOMATIQUEMENT — FORMULE DE BRZYCKI</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Avant / Après -->
+  <section class="max-w-4xl mx-auto px-4 md:px-8 py-14 md:py-20">
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-border bg-surface p-5 md:p-6">
+        <p class="text-[11px] font-display tracking-wide text-steel mb-4">AVANT</p>
+        <ul class="space-y-3 text-sm text-steel">
+          <li class="flex items-start gap-2">
+            <span class="text-plate-red mt-0.5">✕</span> Les séances envoyées dans un groupe WhatsApp qui déborde
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-plate-red mt-0.5">✕</span> Un Excel de 1RM qui se désynchronise à chaque test
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="text-plate-red mt-0.5">✕</span> Aucune idée si un joueur est fatigué avant qu'il se blesse
+          </li>
+        </ul>
+      </div>
+      <div class="rounded-xl border border-plate-green/40 bg-surface p-5 md:p-6">
+        <p class="text-[11px] font-display tracking-wide text-plate-green mb-4">AVEC CHARGE.</p>
+        <ul class="space-y-3 text-sm text-chalk">
+          <li class="flex items-start gap-2">
+            <span class="w-4 h-4 mt-0.5 rounded-full bg-plate-green flex items-center justify-center shrink-0"><span class="text-ink text-[9px]">✓</span></span>
+            Un atelier, une notification, un exercice validé en temps réel
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-4 h-4 mt-0.5 rounded-full bg-plate-green flex items-center justify-center shrink-0"><span class="text-ink text-[9px]">✓</span></span>
+            Un seul test suffit : le 1RM et les paliers de %RM se calculent seuls
+          </li>
+          <li class="flex items-start gap-2">
+            <span class="w-4 h-4 mt-0.5 rounded-full bg-plate-green flex items-center justify-center shrink-0"><span class="text-ink text-[9px]">✓</span></span>
+            Bien-être, RPE et charge suivis séance après séance
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Ateliers / fonctionnalités -->
+  <section id="ateliers" class="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+    <p class="text-[11px] font-display tracking-[0.2em] text-plate-yellow mb-2">LA SÉANCE, CÔTÉ COACH</p>
+    <h2 class="text-2xl md:text-4xl font-display font-semibold mb-10 md:mb-12 max-w-xl">
+      Quatre ateliers. Une seule appli.
+    </h2>
+
+    <div class="grid sm:grid-cols-2 gap-4 md:gap-5">
+      <div
+        *ngFor="let a of ateliers"
+        class="rounded-xl border bg-surface p-5 md:p-6"
+        [ngClass]="{
+          'border-plate-red/40': a.color === 'red',
+          'border-plate-blue/40': a.color === 'blue',
+          'border-plate-yellow/40': a.color === 'yellow',
+          'border-plate-green/40': a.color === 'green'
+        }"
+      >
+        <span
+          class="text-xs font-mono"
+          [ngClass]="{
+            'text-plate-red': a.color === 'red',
+            'text-plate-blue': a.color === 'blue',
+            'text-plate-yellow': a.color === 'yellow',
+            'text-plate-green': a.color === 'green'
+          }"
+        >
+          ATELIER {{ a.number }}
+        </span>
+        <h3 class="mt-2 text-lg font-display font-semibold tracking-wide">{{ a.title }}</h3>
+        <p class="mt-2 text-sm text-steel leading-relaxed">{{ a.description }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Deux rôles -->
+  <section id="roles" class="max-w-6xl mx-auto px-4 md:px-8 py-14 md:py-20">
+    <p class="text-[11px] font-display tracking-[0.2em] text-plate-yellow mb-2">DEUX VUES, UN SEUL ENDROIT</p>
+    <h2 class="text-2xl md:text-4xl font-display font-semibold mb-10 md:mb-12 max-w-xl">
+      Ce que voit le coach. Ce que voit le joueur.
+    </h2>
+
+    <div class="grid md:grid-cols-2 gap-5">
+      <!-- Coach -->
+      <div class="rounded-2xl border border-border bg-surface p-6 md:p-7">
+        <p class="text-xs font-display tracking-wide text-plate-blue mb-4">CÔTÉ COACH</p>
+        <div class="space-y-3">
+          <div class="flex items-center justify-between p-3 rounded-lg bg-surface-alt border border-border">
+            <span class="text-sm text-chalk">Squat — Atelier 1</span>
+            <span class="text-[10px] px-2 py-1 rounded-full bg-plate-green/20 text-plate-green font-display">TERMINÉ</span>
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-lg bg-surface-alt border border-border">
+            <span class="text-sm text-chalk">Développé couché — Atelier 2</span>
+            <span class="text-[10px] px-2 py-1 rounded-full bg-surface text-steel font-display">EN ATTENTE</span>
+          </div>
+          <div class="flex items-center justify-between p-3 rounded-lg bg-surface-alt border border-border">
+            <span class="text-sm text-chalk">Fatigue moyenne (7 j)</span>
+            <span class="text-[10px] px-2 py-1 rounded-full bg-plate-red/20 text-plate-red font-display">À SURVEILLER</span>
+          </div>
+        </div>
+        <p class="mt-4 text-xs text-steel leading-relaxed">
+          Assigne les ateliers, modifie un programme entier en un clic, et repère en un coup d'œil qui a besoin d'attention.
+        </p>
+      </div>
+
+      <!-- Joueur -->
+      <div class="rounded-2xl border border-border bg-surface p-6 md:p-7">
+        <p class="text-xs font-display tracking-wide text-plate-red mb-4">CÔTÉ JOUEUR</p>
+        <div class="space-y-3">
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-alt border border-plate-green">
+            <span class="w-6 h-6 rounded-full bg-plate-green flex items-center justify-center shrink-0"><span class="text-ink text-xs">✓</span></span>
+            <span class="text-sm text-chalk">Squat — 5 × 5 · 75% RM</span>
+          </div>
+          <div class="flex items-center gap-3 p-3 rounded-lg bg-surface-alt border border-border">
+            <span class="w-6 h-6 rounded-full border border-steel shrink-0"></span>
+            <span class="text-sm text-chalk">Développé couché — 4 × 8</span>
+          </div>
+          <div class="p-3 rounded-lg bg-surface-alt border border-border">
+            <span class="text-xs text-steel">Ressenti de l'exercice</span>
+            <div class="flex gap-1 mt-2">
+              <span *ngFor="let n of [1,2,3,4,5,6,7]" class="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-mono"
+                    [ngClass]="n === 6 ? 'bg-plate-blue text-chalk' : 'bg-surface text-steel'">{{ n }}</span>
+            </div>
+          </div>
+        </div>
+        <p class="mt-4 text-xs text-steel leading-relaxed">
+          Un atelier à la fois, un ressenti après chaque exercice, et un minuteur de récupération qui suit le bon rythme.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA final -->
+  <section class="max-w-4xl mx-auto px-4 md:px-8 py-16 md:py-24 text-center">
+    <h2 class="text-3xl md:text-5xl font-display font-semibold leading-tight">
+      Prêt à charger
+      <br />
+      la barre ?
+    </h2>
+    <p class="mt-4 text-steel max-w-md mx-auto">
+      Crée ton compte préparateur physique et envoie ta première séance en quelques minutes.
+    </p>
+    <div class="mt-8 flex justify-center gap-3 flex-wrap">
+      <a routerLink="/register" class="px-6 py-3 rounded-full bg-plate-red text-chalk text-sm font-display tracking-wide hover:brightness-110 transition">
+        CRÉER MON COMPTE COACH
+      </a>
+      <a routerLink="/login" class="px-6 py-3 rounded-full border border-border text-chalk text-sm font-display tracking-wide hover:border-steel transition">
+        SE CONNECTER
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-border">
+    <div class="max-w-6xl mx-auto px-4 md:px-8 py-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="text-sm font-display tracking-wide text-steel">
+        CHARGE<span class="text-plate-red">.</span> — suivi de préparation physique
+      </span>
+      <p class="text-[11px] text-steel">Fait pour les préparateurs physiques et leurs athlètes.</p>
+    </div>
+  </footer>
+</div>

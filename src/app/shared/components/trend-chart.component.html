@@ -1,0 +1,22 @@
+<div *ngIf="points.length > 0; else empty">
+  <svg [attr.viewBox]="viewBox" class="w-full h-20">
+    <polyline
+      [attr.points]="polylinePoints()"
+      fill="none"
+      [attr.stroke]="color"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    />
+    <circle
+      *ngIf="lastPoint() as p"
+      [attr.cx]="p.x"
+      [attr.cy]="p.y"
+      r="3"
+      [attr.fill]="color"
+    />
+  </svg>
+</div>
+<ng-template #empty>
+  <p class="text-xs text-steel py-6 text-center">{{ emptyLabel }}</p>
+</ng-template>

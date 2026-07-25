@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+html, body {
+  height: 100%;
+  margin: 0;
+  background-color: #14161A;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Landing page : la barre qui se charge de disques dans le hero */
+@keyframes plate-in {
+  from { opacity: 0; transform: scale(0.4) translateY(14px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.plate-anim {
+  animation: plate-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .plate-anim {
+    animation: none;
+  }
+}
+
+/* Barre de défilement fine pour les puces de charges (1RM-20RM) */
+.chips-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+.chips-scroll::-webkit-scrollbar-thumb {
+  background-color: #2E323A;
+  border-radius: 2px;
+}

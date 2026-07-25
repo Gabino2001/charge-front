@@ -1,0 +1,222 @@
+<div class="min-h-screen bg-ink">
+  <header class="flex items-center gap-3 px-4 md:px-8 py-4 border-b border-border">
+    <a routerLink="/coach" class="text-xs text-steel font-display tracking-wide">← EFFECTIF</a>
+    <span class="text-xl font-display font-semibold text-chalk ml-auto">
+      CHARGE<span class="text-plate-red">.</span>
+    </span>
+  </header>
+
+  <div class="max-w-2xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex items-center justify-between">
+      <h1 class="text-2xl font-display font-semibold text-chalk">Programmes</h1>
+      <button
+        (click)="openCreateForm()"
+        class="text-xs px-3 py-2 rounded-md bg-plate-red text-chalk font-display tracking-wide"
+      >
+        + NOUVEAU PROGRAMME
+      </button>
+    </div>
+
+    <!-- Formulaire de création / modification -->
+    <form
+      *ngIf="showCreateForm()"
+      [formGroup]="form"
+      (ngSubmit)="submit()"
+      class="bg-surface border border-border rounded-xl p-4 space-y-4"
+    >
+      <p class="text-xs uppercase tracking-wide text-steel font-display">
+        {{ editingProgramId() ? 'Modifier le programme' : 'Nouveau programme' }}
+      </p>
+      <div class="space-y-2">
+        <input
+          formControlName="name"
+          placeholder="Nom du programme (ex. Semaine de reprise)"
+          class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+        <input
+          formControlName="description"
+          placeholder="Description (optionnel)"
+          class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        />
+      </div>
+
+      <div class="space-y-1">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Type de séance</p>
+        <select
+          formControlName="sessionType"
+          class="w-full px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none"
+        >
+          <option value="ATELIER">Atelier (repos entre chaque exercice du bloc)</option>
+          <option value="SUPERSET">Super Set (aucun repos entre les exercices du bloc, repos en fin de bloc)</option>
+        </select>
+      </div>
+
+      <!-- Ateliers (blocs d'exercices enchaînés) -->
+      <div formArrayName="blocks" class="space-y-3">
+        <p class="text-xs uppercase tracking-wide text-steel font-display">Ateliers</p>
+
+        <div
+          *ngFor="let block of blocks.controls; let bi = index"
+          [formGroupName]="bi"
+          class="bg-surface-alt/40 border border-border rounded-lg p-3 space-y-2"
+        >
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-chalk font-display">Atelier {{ bi + 1 }}</p>
+            <div class="flex items-center gap-2">
+              <button type="button" (click)="moveBlock(bi, -1)" [disabled]="bi === 0" class="text-steel text-xs px-1 disabled:opacity-30">▲</button>
+              <button type="button" (click)="moveBlock(bi, 1)" [disabled]="bi === blocks.length - 1" class="text-steel text-xs px-1 disabled:opacity-30">▼</button>
+              <button type="button" (click)="removeBlock(bi)" class="text-steel text-xs px-2">✕ supprimer l'atelier</button>
+            </div>
+          </div>
+
+          <div formArrayName="exercises" class="space-y-2">
+            <div
+              *ngFor="let ex of exercisesOf(block).controls; let ei = index"
+              [formGroupName]="ei"
+              class="grid grid-cols-2 md:grid-cols-6 gap-2 items-center"
+            >
+              <input formControlName="title" placeholder="Titre" class="col-span-2 md:col-span-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              <input formControlName="sets" type="number" placeholder="Séries" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              <input formControlName="reps" placeholder="Reps" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              <input formControlName="videoUrl" placeholder="Lien vidéo" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              <input formControlName="percentRm" type="number" min="0" max="100" placeholder="% RM" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+              <div class="flex items-center gap-1">
+                <input formControlName="recoveryTimeSeconds" type="number" placeholder="Récup. (s)" class="flex-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <button type="button" (click)="moveExercise(bi, ei, -1)" [disabled]="ei === 0" class="text-steel text-xs px-1 disabled:opacity-30">▲</button>
+                <button type="button" (click)="moveExercise(bi, ei, 1)" [disabled]="ei === exercisesOf(block).length - 1" class="text-steel text-xs px-1 disabled:opacity-30">▼</button>
+                <button type="button" (click)="removeExerciseFromBlock(bi, ei)" class="text-steel text-xs px-2">✕</button>
+              </div>
+            </div>
+            <button type="button" (click)="addExerciseToBlock(bi)" class="text-xs px-3 py-1.5 rounded-md border border-border text-steel font-display tracking-wide">
+              + AJOUTER UN EXERCICE À CET ATELIER
+            </button>
+          </div>
+
+          <div class="flex items-center gap-2 pt-1">
+            <label class="text-xs text-steel">Récup. une fois l'atelier terminé (avant de reprendre un tour) :</label>
+            <input formControlName="recoveryTimeSeconds" type="number" placeholder="sec" class="w-20 px-2 py-1 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+          </div>
+        </div>
+
+        <button type="button" (click)="addBlock()" class="text-xs px-3 py-1.5 rounded-md border border-border text-steel font-display tracking-wide">
+          + AJOUTER UN ATELIER
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="submit"
+          [disabled]="form.invalid || saving()"
+          class="px-3 py-2 rounded-md text-xs bg-plate-blue text-chalk font-display tracking-wide disabled:opacity-40"
+        >
+          {{ saving() ? 'ENVOI…' : (editingProgramId() ? 'ENREGISTRER LES MODIFICATIONS' : 'CRÉER LE PROGRAMME') }}
+        </button>
+        <button
+          *ngIf="editingProgramId()"
+          type="button"
+          (click)="cancelEditProgram()"
+          class="px-3 py-2 rounded-md text-xs border border-border text-steel font-display tracking-wide"
+        >
+          ANNULER
+        </button>
+      </div>
+    </form>
+
+    <!-- Liste des programmes -->
+    <div class="space-y-3">
+      <div *ngFor="let program of programs()" class="bg-surface border border-border rounded-xl p-4 space-y-3">
+        <div class="flex items-start justify-between gap-3">
+          <div>
+            <p class="text-sm text-chalk font-display">{{ program.name }}</p>
+            <p class="text-xs text-steel" *ngIf="program.description">{{ program.description }}</p>
+            <div class="flex items-center gap-2 mt-1">
+              <span
+                class="text-[10px] px-1.5 py-0.5 rounded-full font-display tracking-wide"
+                [ngClass]="program.sessionType === 'SUPERSET' ? 'bg-plate-yellow/20 text-plate-yellow' : 'bg-plate-blue/20 text-plate-blue'"
+              >{{ program.sessionType === 'SUPERSET' ? 'SUPER SET' : 'ATELIER' }}</span>
+              <span class="text-xs text-steel">{{ program.blocks.length }} atelier(s)</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <button
+              (click)="openAssign(program.id)"
+              class="text-[10px] px-2 py-1 rounded-full bg-plate-blue text-chalk font-display tracking-wide"
+            >
+              ASSIGNER
+            </button>
+            <button
+              (click)="startEditProgram(program)"
+              class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+            >
+              MODIFIER
+            </button>
+            <button
+              (click)="duplicateProgram(program)"
+              class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+            >
+              DUPLIQUER
+            </button>
+            <button
+              (click)="resendProgram(program.id)"
+              [disabled]="resendingProgramId() === program.id"
+              class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide disabled:opacity-40"
+              title="Renvoie la version actuelle aux joueurs qui l'ont déjà reçu"
+            >
+              {{ resendingProgramId() === program.id ? 'ENVOI…' : 'RENVOYER' }}
+            </button>
+            <button
+              (click)="deleteProgram(program.id)"
+              class="text-[10px] px-2 py-1 rounded-full border border-border text-steel font-display tracking-wide"
+            >
+              SUPPRIMER
+            </button>
+          </div>
+        </div>
+
+        <!-- Détail des ateliers du programme -->
+        <div class="space-y-2">
+          <div *ngFor="let block of program.blocks; let bi = index" class="pl-3 border-l-2 border-border">
+            <p class="text-[10px] uppercase text-steel font-display">
+              Atelier {{ bi + 1 }}<span *ngIf="block.recoveryTimeSeconds"> · récup {{ block.recoveryTimeSeconds }}s</span>
+            </p>
+           <p class="text-xs text-chalk">
+  {{ block.exercises.length }} exercice(s) :
+  <span class="text-steel">{{ getExerciseTitles(block) }}</span>
+</p>
+          </div>
+        </div>
+
+        <!-- Sélecteur de joueurs pour l'assignation -->
+        <div *ngIf="assigningProgramId() === program.id" class="pt-3 border-t border-border space-y-2">
+          <p class="text-xs uppercase tracking-wide text-steel font-display">Assigner à :</p>
+          <div class="space-y-1 max-h-40 overflow-y-auto">
+            <label *ngFor="let p of players()" class="flex items-center gap-2 text-sm text-chalk">
+              <input
+                type="checkbox"
+                [checked]="selectedPlayerIds().has(p.id)"
+                (change)="togglePlayer(p.id)"
+              />
+              {{ p.fullName }}
+            </label>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              (click)="confirmAssign()"
+              [disabled]="selectedPlayerIds().size === 0 || assigning()"
+              class="text-xs px-3 py-1.5 rounded-md bg-plate-red text-chalk font-display tracking-wide disabled:opacity-40"
+            >
+              {{ assigning() ? 'ENVOI…' : 'CONFIRMER' }}
+            </button>
+            <button (click)="closeAssign()" class="text-xs px-3 py-1.5 rounded-md border border-border text-steel font-display tracking-wide">
+              ANNULER
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p *ngIf="!loading() && programs().length === 0" class="text-sm text-steel text-center py-8">
+        Aucun programme pour l'instant.
+      </p>
+    </div>
+  </div>
+</div>
