@@ -2,42 +2,44 @@
 
   <!-- Nav -->
   <nav class="sticky top-0 z-30 backdrop-blur bg-ink/85 border-b border-border">
-    <div class="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-      <span class="text-xl font-display font-semibold tracking-wide">
+    <div class="max-w-6xl mx-auto px-3 sm:px-4 md:px-8 h-14 sm:h-16 flex items-center justify-between gap-2">
+      <span class="text-base sm:text-xl font-display font-semibold tracking-wide shrink-0">
         CHARGE<span class="text-plate-red">.</span>
       </span>
       <div class="hidden md:flex items-center gap-8 text-xs font-display tracking-wide text-steel">
         <a href="#ateliers" class="hover:text-chalk transition-colors">FONCTIONNALITÉS</a>
         <a href="#roles" class="hover:text-chalk transition-colors">COACH &amp; JOUEUR</a>
       </div>
-      <div class="flex items-center gap-2">
-        <a routerLink="/login" class="text-xs px-3 py-2 rounded-full border border-border text-steel font-display tracking-wide hover:text-chalk hover:border-steel transition-colors">
-          SE CONNECTER
+      <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+        <a routerLink="/login" class="text-[10px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full border border-border text-steel font-display tracking-wide hover:text-chalk hover:border-steel transition-colors whitespace-nowrap">
+          <span class="sm:hidden">CONNEXION</span>
+          <span class="hidden sm:inline">SE CONNECTER</span>
         </a>
-        <a routerLink="/register" class="text-xs px-3 py-2 rounded-full bg-plate-red text-chalk font-display tracking-wide hover:brightness-110 transition">
-          CRÉER UN COMPTE
+        <a routerLink="/register" class="text-[10px] sm:text-xs px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-full bg-plate-red text-chalk font-display tracking-wide hover:brightness-110 transition whitespace-nowrap">
+          <span class="sm:hidden">S'INSCRIRE</span>
+          <span class="hidden sm:inline">CRÉER UN COMPTE</span>
         </a>
       </div>
     </div>
   </nav>
 
   <!-- Hero -->
-  <header class="max-w-6xl mx-auto px-4 md:px-8 pt-14 md:pt-20 pb-16 md:pb-24">
-    <div class="grid md:grid-cols-2 gap-12 items-center">
+  <header class="max-w-6xl mx-auto px-4 md:px-8 pt-10 sm:pt-14 md:pt-20 pb-14 sm:pb-16 md:pb-24">
+    <div class="grid md:grid-cols-2 gap-10 md:gap-12 items-center">
       <div>
-        <p class="text-[11px] font-display tracking-[0.2em] text-plate-yellow mb-4">
+        <p class="text-[10px] sm:text-[11px] font-display tracking-[0.2em] text-plate-yellow mb-3 sm:mb-4">
           POUR PRÉPARATEURS PHYSIQUES &amp; ATHLÈTES
         </p>
-        <h1 class="text-4xl sm:text-5xl md:text-6xl font-display font-semibold leading-[1.05] tracking-tight">
+        <h1 class="text-3xl sm:text-5xl md:text-6xl font-display font-semibold leading-[1.05] tracking-tight">
           CHAQUE CHARGE
           <br />
           <span class="text-plate-red">COMPTE.</span>
         </h1>
-        <p class="mt-6 text-base md:text-lg text-steel max-w-md leading-relaxed">
+        <p class="mt-5 sm:mt-6 text-sm sm:text-base md:text-lg text-steel max-w-md leading-relaxed">
           CHARGE. remplace le carnet, le tableur et les messages WhatsApp par un seul endroit pour programmer
           les séances, calculer le 1RM et lire le ressenti de chaque joueur — atelier par atelier.
         </p>
-        <div class="mt-8 flex flex-wrap items-center gap-3">
+        <div class="mt-7 sm:mt-8 flex flex-wrap items-center gap-3">
           <a routerLink="/register" class="px-5 py-3 rounded-full bg-plate-red text-chalk text-sm font-display tracking-wide hover:brightness-110 transition">
             CRÉER MON COMPTE COACH
           </a>
@@ -48,40 +50,40 @@
       </div>
 
       <!-- Signature : la barre qui se charge -->
-      <div class="rounded-2xl border border-border bg-surface p-6 md:p-10">
-        <div class="flex items-center justify-center gap-1 md:gap-1.5">
-          <div class="plate-anim w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-plate-green bg-plate-green/15 flex items-center justify-center" style="animation-delay:0ms">
-            <span class="text-[9px] md:text-[10px] font-mono text-plate-green">10</span>
+      <div class="rounded-2xl border border-border bg-surface p-4 sm:p-6 md:p-10 overflow-hidden">
+        <div class="flex flex-wrap items-center justify-center gap-1 md:gap-1.5">
+          <div class="plate-anim w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border-4 border-plate-green bg-plate-green/15 flex items-center justify-center" style="animation-delay:0ms">
+            <span class="text-[8px] sm:text-[9px] md:text-[10px] font-mono text-plate-green">10</span>
           </div>
-          <div class="plate-anim w-11 h-11 md:w-14 md:h-14 rounded-full border-4 border-plate-yellow bg-plate-yellow/15 flex items-center justify-center" style="animation-delay:90ms">
-            <span class="text-[9px] md:text-[10px] font-mono text-plate-yellow">15</span>
+          <div class="plate-anim w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full border-4 border-plate-yellow bg-plate-yellow/15 flex items-center justify-center" style="animation-delay:90ms">
+            <span class="text-[8px] sm:text-[9px] md:text-[10px] font-mono text-plate-yellow">15</span>
           </div>
-          <div class="plate-anim w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-plate-blue bg-plate-blue/15 flex items-center justify-center" style="animation-delay:180ms">
-            <span class="text-[9px] md:text-[10px] font-mono text-plate-blue">20</span>
+          <div class="plate-anim w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full border-4 border-plate-blue bg-plate-blue/15 flex items-center justify-center" style="animation-delay:180ms">
+            <span class="text-[8px] sm:text-[9px] md:text-[10px] font-mono text-plate-blue">20</span>
           </div>
-          <div class="plate-anim w-14 h-14 md:w-20 md:h-20 rounded-full border-4 border-plate-red bg-plate-red/15 flex items-center justify-center" style="animation-delay:270ms">
-            <span class="text-[10px] md:text-xs font-mono text-plate-red">25</span>
+          <div class="plate-anim w-11 h-11 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-full border-4 border-plate-red bg-plate-red/15 flex items-center justify-center" style="animation-delay:270ms">
+            <span class="text-[9px] sm:text-[10px] md:text-xs font-mono text-plate-red">25</span>
           </div>
 
-          <div class="h-1.5 md:h-2 w-10 md:w-16 bg-steel/30 rounded-full shrink-0"></div>
+          <div class="h-1.5 md:h-2 w-8 sm:w-10 md:w-16 bg-steel/30 rounded-full shrink-0"></div>
 
-          <div class="plate-anim w-14 h-14 md:w-20 md:h-20 rounded-full border-4 border-plate-red bg-plate-red/15 flex items-center justify-center" style="animation-delay:270ms">
-            <span class="text-[10px] md:text-xs font-mono text-plate-red">25</span>
+          <div class="plate-anim w-11 h-11 sm:w-14 sm:h-14 md:w-20 md:h-20 rounded-full border-4 border-plate-red bg-plate-red/15 flex items-center justify-center" style="animation-delay:270ms">
+            <span class="text-[9px] sm:text-[10px] md:text-xs font-mono text-plate-red">25</span>
           </div>
-          <div class="plate-anim w-12 h-12 md:w-16 md:h-16 rounded-full border-4 border-plate-blue bg-plate-blue/15 flex items-center justify-center" style="animation-delay:180ms">
-            <span class="text-[9px] md:text-[10px] font-mono text-plate-blue">20</span>
+          <div class="plate-anim w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full border-4 border-plate-blue bg-plate-blue/15 flex items-center justify-center" style="animation-delay:180ms">
+            <span class="text-[8px] sm:text-[9px] md:text-[10px] font-mono text-plate-blue">20</span>
           </div>
-          <div class="plate-anim w-11 h-11 md:w-14 md:h-14 rounded-full border-4 border-plate-yellow bg-plate-yellow/15 flex items-center justify-center" style="animation-delay:90ms">
-            <span class="text-[9px] md:text-[10px] font-mono text-plate-yellow">15</span>
+          <div class="plate-anim w-9 h-9 sm:w-11 sm:h-11 md:w-14 md:h-14 rounded-full border-4 border-plate-yellow bg-plate-yellow/15 flex items-center justify-center" style="animation-delay:90ms">
+            <span class="text-[8px] sm:text-[9px] md:text-[10px] font-mono text-plate-yellow">15</span>
           </div>
-          <div class="plate-anim w-10 h-10 md:w-12 md:h-12 rounded-full border-4 border-plate-green bg-plate-green/15 flex items-center justify-center" style="animation-delay:0ms">
-            <span class="text-[9px] md:text-[10px] font-mono text-plate-green">10</span>
+          <div class="plate-anim w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full border-4 border-plate-green bg-plate-green/15 flex items-center justify-center" style="animation-delay:0ms">
+            <span class="text-[8px] sm:text-[9px] md:text-[10px] font-mono text-plate-green">10</span>
           </div>
         </div>
 
-        <div class="mt-8 text-center">
-          <p class="text-4xl md:text-5xl font-mono font-bold text-chalk tabular-nums">{{ displayedLoad }}<span class="text-lg text-steel"> kg</span></p>
-          <p class="mt-2 text-[11px] text-steel font-display tracking-wide">1RM CALCULÉ AUTOMATIQUEMENT — FORMULE DE BRZYCKI</p>
+        <div class="mt-6 sm:mt-8 text-center">
+          <p class="text-3xl sm:text-4xl md:text-5xl font-mono font-bold text-chalk tabular-nums">{{ displayedLoad }}<span class="text-base sm:text-lg text-steel"> kg</span></p>
+          <p class="mt-2 text-[10px] sm:text-[11px] text-steel font-display tracking-wide">1RM CALCULÉ AUTOMATIQUEMENT — FORMULE DE BRZYCKI</p>
         </div>
       </div>
     </div>
