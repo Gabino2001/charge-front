@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.charge-app.example.com/api',
+  apiUrl: 'https://charge-awys.onrender.com/api',
 };
