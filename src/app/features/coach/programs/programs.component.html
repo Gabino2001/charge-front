@@ -69,23 +69,38 @@
             </div>
           </div>
 
-          <div formArrayName="exercises" class="space-y-2">
+          <div formArrayName="exercises" class="space-y-3">
             <div
               *ngFor="let ex of exercisesOf(block).controls; let ei = index"
               [formGroupName]="ei"
-              class="grid grid-cols-2 md:grid-cols-6 gap-2 items-center"
+              class="bg-ink/40 border border-border/60 rounded-md p-2.5 space-y-2"
             >
-              <input formControlName="title" placeholder="Titre" class="col-span-2 md:col-span-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
-              <input formControlName="sets" type="number" placeholder="Séries" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
-              <input formControlName="reps" placeholder="Reps" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
-              <input formControlName="videoUrl" placeholder="Lien vidéo" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
-              <input formControlName="percentRm" type="number" min="0" max="100" placeholder="% RM" class="px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
-              <div class="flex items-center gap-1">
-                <input formControlName="recoveryTimeSeconds" type="number" placeholder="Récup. (s)" class="flex-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
-                <button type="button" (click)="moveExercise(bi, ei, -1)" [disabled]="ei === 0" class="text-steel text-xs px-1 disabled:opacity-30">▲</button>
-                <button type="button" (click)="moveExercise(bi, ei, 1)" [disabled]="ei === exercisesOf(block).length - 1" class="text-steel text-xs px-1 disabled:opacity-30">▼</button>
-                <button type="button" (click)="removeExerciseFromBlock(bi, ei)" class="text-steel text-xs px-2">✕</button>
+              <!-- Titre + actions -->
+              <div class="flex items-center gap-2">
+                <input formControlName="title" placeholder="Titre de l'exercice" class="flex-1 min-w-0 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none" />
+                <div class="flex items-center gap-0.5 shrink-0">
+                  <button type="button" (click)="moveExercise(bi, ei, -1)" [disabled]="ei === 0" class="text-steel text-xs px-1.5 py-1 disabled:opacity-30">▲</button>
+                  <button type="button" (click)="moveExercise(bi, ei, 1)" [disabled]="ei === exercisesOf(block).length - 1" class="text-steel text-xs px-1.5 py-1 disabled:opacity-30">▼</button>
+                  <button type="button" (click)="removeExerciseFromBlock(bi, ei)" class="text-steel text-xs px-1.5 py-1">✕</button>
+                </div>
               </div>
+
+              <!-- Séries / Reps / Tempo -->
+              <div class="grid grid-cols-3 gap-2">
+                <input formControlName="sets" type="number" placeholder="Séries" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="reps" placeholder="Reps" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="tempo" placeholder="Tempo (3-1-1-0)" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
+              </div>
+
+              <!-- Charge / % RM / Récup -->
+              <div class="grid grid-cols-3 gap-2">
+                <input formControlName="loadKg" type="number" step="0.5" placeholder="Charge (kg)" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="percentRm" type="number" min="0" max="100" placeholder="% RM" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
+                <input formControlName="recoveryTimeSeconds" type="number" placeholder="Récup (s)" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
+              </div>
+
+              <!-- Lien vidéo -->
+              <input formControlName="videoUrl" placeholder="Lien vidéo (optionnel)" class="w-full px-2.5 py-2 rounded-md text-xs bg-surface-alt border border-border text-chalk outline-none" />
             </div>
             <button type="button" (click)="addExerciseToBlock(bi)" class="text-xs px-3 py-1.5 rounded-md border border-border text-steel font-display tracking-wide">
               + AJOUTER UN EXERCICE À CET ATELIER
@@ -175,14 +190,19 @@
 
         <!-- Détail des ateliers du programme -->
         <div class="space-y-2">
-          <div *ngFor="let block of program.blocks; let bi = index" class="pl-3 border-l-2 border-border">
+          <div *ngFor="let block of program.blocks; let bi = index" class="pl-3 border-l-2 border-border space-y-1">
             <p class="text-[10px] uppercase text-steel font-display">
               Atelier {{ bi + 1 }}<span *ngIf="block.recoveryTimeSeconds"> · récup {{ block.recoveryTimeSeconds }}s</span>
             </p>
-           <p class="text-xs text-chalk">
-  {{ block.exercises.length }} exercice(s) :
-  <span class="text-steel">{{ getExerciseTitles(block) }}</span>
-</p>
+            <p *ngFor="let ex of block.exercises" class="text-xs text-chalk">
+              {{ ex.title }}
+              <span class="text-steel">
+                <ng-container *ngIf="ex.sets">· {{ ex.sets }}x{{ ex.reps || '?' }}</ng-container>
+                <ng-container *ngIf="ex.tempo"> · tempo {{ ex.tempo }}</ng-container>
+                <ng-container *ngIf="ex.loadKg"> · {{ ex.loadKg }} kg</ng-container>
+                <ng-container *ngIf="ex.percentRm"> · {{ ex.percentRm }}% RM</ng-container>
+              </span>
+            </p>
           </div>
         </div>
 

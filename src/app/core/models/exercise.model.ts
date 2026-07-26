@@ -4,6 +4,10 @@ export interface CreateExerciseRequest {
   title: string;
   sets?: number | null;
   reps?: string | null;
+  /** Tempo d'exécution au format 4 temps (ex. "3-1-1-0", "4-0-X-0"). */
+  tempo?: string | null;
+  /** Charge de travail en kilogrammes (ex. 60 pour 60 kg). */
+  loadKg?: number | null;
   videoUrl?: string | null;
   scheduledFor?: string | null;
   /** Temps de récupération (en secondes) après cet exercice, donné par le coach. */
@@ -22,6 +26,8 @@ export interface UpdateExerciseRequest {
   title: string;
   sets?: number | null;
   reps?: string | null;
+  tempo?: string | null;
+  loadKg?: number | null;
   videoUrl?: string | null;
   scheduledFor?: string | null;
   recoveryTimeSeconds?: number | null;
@@ -36,6 +42,8 @@ export interface Exercise {
   title: string;
   sets: number | null;
   reps: string | null;
+  tempo: string | null;
+  loadKg: number | null;
   videoUrl: string | null;
   scheduledFor: string;
   done: boolean;

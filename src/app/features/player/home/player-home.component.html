@@ -229,6 +229,8 @@
               <p class="text-sm text-chalk">{{ ex.title }}</p>
               <p class="text-xs text-steel font-mono">
                 {{ ex.sets ?? '-' }} × {{ ex.reps ?? '-' }}
+                <span *ngIf="ex.loadKg"> · {{ ex.loadKg }} kg</span>
+                <span *ngIf="ex.tempo" class="text-plate-blue"> · tempo {{ ex.tempo }}</span>
                 <span *ngIf="ex.percentRm" class="text-plate-yellow"> · {{ ex.percentRm }}% RM<span *ngIf="suggestedWeight(ex) as w"> ≈ {{ w }} kg</span></span>
               </p>
               <p *ngIf="ex.exerciseRpe !== null" class="text-[10px] text-plate-blue font-mono mt-0.5">Ressenti : {{ ex.exerciseRpe }}/10</p>
