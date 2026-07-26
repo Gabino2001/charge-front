@@ -31,6 +31,9 @@
           class="w-full mt-1 px-3 py-2 rounded-md text-sm bg-surface-alt border border-border text-chalk outline-none focus:border-plate-blue"
           placeholder="••••••••"
         />
+        <a routerLink="/forgot-password" class="block mt-1.5 text-[11px] text-plate-blue hover:underline">
+          Mot de passe oublié ?
+        </a>
       </div>
 
       <p *ngIf="errorMessage()" class="text-xs text-plate-red">{{ errorMessage() }}</p>
