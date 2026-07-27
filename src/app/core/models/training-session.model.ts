@@ -1,5 +1,14 @@
 export type TrainingSessionStatus = 'IN_PROGRESS' | 'COMPLETED';
 
+export type AcwrZone = 'LOW' | 'OPTIMAL' | 'ELEVATED' | 'HIGH_RISK' | 'INSUFFICIENT_DATA';
+
+/** Un point de la courbe d'évolution ACWR : le ratio calculé pour un jour donné. */
+export interface AcwrHistoryPoint {
+  date: string;
+  ratio: number | null;
+  zone: AcwrZone;
+}
+
 export interface TrainingSession {
   id: number;
   sessionDate: string;

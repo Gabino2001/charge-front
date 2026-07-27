@@ -18,6 +18,7 @@ import { WellnessResponse } from '../../../core/models/wellness.model';
 import { RpeResponse } from '../../../core/models/rpe.model';
 import { PlayerAlert } from '../../../core/models/alert.model';
 import { TrendPoint } from '../../../core/models/trend.model';
+import { AcwrHistoryPoint } from '../../../core/models/training-session.model';
 import { Injury, InjuryStatus } from '../../../core/models/injury.model';
 import { Goal } from '../../../core/models/goal.model';
 import { PlateStackComponent } from '../../../shared/components/plate-stack.component';
@@ -25,12 +26,13 @@ import { RmChipsComponent } from '../../../shared/components/rm-chips.component'
 import { TrendChartComponent } from '../../../shared/components/trend-chart.component';
 import { suggestedWeightFor } from '../../../shared/utils/suggested-weight.util';
 import { AcwrBadgeComponent } from '../../../shared/components/acwr-badge.component';
+import { AcwrTrendChartComponent } from '../../../shared/components/acwr-trend-chart.component';
 import { exportPlayerReportPdf } from '../../../shared/utils/pdf-report.util';
 
 @Component({
   selector: 'app-player-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, PlateStackComponent, RmChipsComponent, TrendChartComponent, AcwrBadgeComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterLink, PlateStackComponent, RmChipsComponent, TrendChartComponent, AcwrBadgeComponent, AcwrTrendChartComponent],
   templateUrl: './player-detail.component.html',
 })
 export class PlayerDetailComponent implements OnInit {
@@ -65,6 +67,7 @@ export class PlayerDetailComponent implements OnInit {
   wellnessTrend = signal<TrendPoint[]>([]);
   rpeTrend = signal<TrendPoint[]>([]);
   oneRmTrend = signal<TrendPoint[]>([]);
+  acwrTrend = signal<AcwrHistoryPoint[]>([]);
   selectedExercise = signal<string | null>(null);
 
   editingExerciseId = signal<number | null>(null);
@@ -136,6 +139,11 @@ export class PlayerDetailComponent implements OnInit {
     this.refreshAlerts();
     this.refreshInjuries();
     this.refreshGoals();
+    this.refreshAcwrTrend();
+  }
+
+  refreshAcwrTrend(): void {
+    this.sessionService.acwrHistory(this.playerId).subscribe((points) => this.acwrTrend.set(points));
   }
 
   // ---- Chargement ----

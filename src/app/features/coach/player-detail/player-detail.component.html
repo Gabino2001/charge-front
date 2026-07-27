@@ -362,6 +362,14 @@
       <p class="text-xs uppercase tracking-wide text-steel font-display">Tendances</p>
 
       <div>
+        <div class="flex items-center justify-between mb-1">
+          <p class="text-xs text-steel">Charge d'entraînement (ACWR)</p>
+          <span class="text-[10px] text-steel/70" title="Ratio charge aiguë (7j) / chronique (28j)">aiguë ÷ chronique</span>
+        </div>
+        <app-acwr-trend-chart [points]="acwrTrend()"></app-acwr-trend-chart>
+      </div>
+
+      <div>
         <p class="text-xs text-steel mb-1">Bien-être (moyenne /5)</p>
         <app-trend-chart [points]="wellnessTrend()" color="#4C9A6A" [min]="0" [max]="5" emptyLabel="Pas encore assez de données."></app-trend-chart>
       </div>

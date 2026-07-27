@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { SubmitSessionRpeRequest, TrainingSession } from '../models/training-session.model';
+import { SubmitSessionRpeRequest, TrainingSession, AcwrHistoryPoint } from '../models/training-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class TrainingSessionService {
@@ -32,5 +32,10 @@ export class TrainingSessionService {
   /** Côté préparateur : historique des séances d'un joueur de l'effectif (courbes de charge). */
   historyForPlayer(playerId: number): Observable<TrainingSession[]> {
     return this.http.get<TrainingSession[]>(`${this.baseUrl}/players/${playerId}/sessions`);
+  }
+
+  /** Côté préparateur : courbe d'évolution du ratio ACWR (60 derniers jours) d'un joueur de l'effectif. */
+  acwrHistory(playerId: number): Observable<AcwrHistoryPoint[]> {
+    return this.http.get<AcwrHistoryPoint[]>(`${this.baseUrl}/players/${playerId}/acwr/history`);
   }
 }
